@@ -1,0 +1,96 @@
+/*blog字体 -------------------------------------------------------------------- */
+@font-face{
+  font-family:'blogFont' ;  /* 字体名自定义即可 */
+  src:url('/fonts/circle400w.ttf'); /* 字体文件路径 */
+  font-display : swap;
+}
+
+h1#site-title {
+  font-family: 'blogFont', sans-serif;
+}
+
+body {
+  font-family: 'blogFont', sans-serif;
+  code-font-family: consolas;
+}
+
+/*模糊变清晰效果 -------------------------------------------------------------------- */
+
+/*10s为加载动画的时间，1为加载动画的次数，ease-in-out为动画效果*/
+#page-header,
+#web_bg {
+    -webkit-animation: imgblur 1s 1 ease-in-out;
+    animation: imgblur 1s 1 ease-in-out;
+}
+@keyframes imgblur {
+  0% {
+    filter: blur(5px);
+  }
+  100% {
+    filter: blur(0px);
+  }
+}
+/*适配使用-webkit内核的浏览器 */
+@-webkit-keyframes imgblur {
+  0% {
+    -webkit-filter: blur(5px);
+  }
+  100% {
+    -webkit-filter: blur(0px);
+  }
+}
+
+/* 整个blog图片一致-------------------------------------------------------------------- */
+
+/* 页脚透明 footer_bg: false为前提*/
+#footer {
+  background: transparent!important;
+}
+/* 头图透明 */
+#page-header{
+  background: transparent!important;
+}
+/*top-img黑色透明玻璃效果移除，不建议加，除非你执着于完全一图流或者背景图对比色明显 */
+#page-header.post-bg:before {
+  background-color: transparent!important;
+}
+/*夜间模式伪类遮罩层透明*/
+[data-theme="dark"]
+  #footer::before{
+      background: transparent!important;
+    }
+[data-theme="dark"]
+  #page-header::before{
+    background: transparent!important;
+    }
+
+/* 卡片透明度-------------------------------------------------------------------- */
+#recent-posts > .recent-post-item{
+  opacity: 0.95;
+}
+/* 首页侧栏卡片 */
+.card-widget{
+  opacity: 0.95;
+}
+/* 文章页面正文背景 */
+div#post{
+  opacity: 0.95;
+}
+/* 分页页面 */
+div#page{
+  opacity: 0.95;
+}
+/* 归档页面 */
+div#archive{
+  opacity: 0.95;
+}
+/* 标签页面 */
+div#tag{
+  opacity: 0.95;
+}
+/* 分类页面 */
+div#category{
+  opacity: 0.95;
+}
+
+/* -------------------------------------------------------------------- */
