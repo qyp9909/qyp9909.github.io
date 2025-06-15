@@ -1,0 +1,111 @@
+/*blog字体 -------------------------------------------------------------------- */
+@font-face{
+  font-family:'blogFont' ;  /* 字体名自定义即可 */
+  src:url('/fonts/circle400w.ttf'); /* 字体文件路径 */
+  font-display : swap;
+}
+
+h1#site-title {
+  font-family: 'blogFont', sans-serif;
+}
+
+body {
+  font-family: 'blogFont', sans-serif;
+  code-font-family: consolas;
+}
+
+/* 设置滚动条整体样式 */
+::-webkit-scrollbar {
+  width: 12px; /* 设置滚动条的宽度 */
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 6px; /* 圆角 */
+}
+
+/*模糊变清晰效果 -------------------------------------------------------------------- */
+
+/*10s为加载动画的时间，1为加载动画的次数，ease-in-out为动画效果*/
+#page-header,
+#web_bg {
+    -webkit-animation: imgblur 1.2s 1 ease-in-out;
+    animation: imgblur 1.2s 1 ease-in-out;
+}
+@keyframes imgblur {
+  0% {
+    filter: blur(5px);
+  }
+  100% {
+    filter: blur(0px);
+  }
+}
+/*适配使用-webkit内核的浏览器 */
+@-webkit-keyframes imgblur {
+  0% {
+    -webkit-filter: blur(5px);
+  }
+  100% {
+    -webkit-filter: blur(0px);
+  }
+}
+
+/* 整个blog图片一致-------------------------------------------------------------------- */
+
+/* 页脚透明 footer_bg: false为前提*/
+#footer {
+  background: transparent!important;
+}
+/* 头图透明 */
+#page-header{
+  background: transparent!important;
+}
+/*top-img黑色透明玻璃效果移除，不建议加，除非你执着于完全一图流或者背景图对比色明显 */
+#page-header.post-bg:before {
+  background-color: transparent!important;
+}
+/*夜间模式伪类遮罩层透明*/
+[data-theme="dark"]
+  #footer::before{
+      background: transparent!important;
+    }
+[data-theme="dark"]
+  #page-header::before{
+    background: transparent!important;
+    }
+
+/* 卡片透明度-------------------------------------------------------------------- */
+
+/*侧边卡片的透明度 */
+:root {
+    --card-bg: rgba(255, 255, 255, .9);
+}
+
+[data-theme='dark'] {
+  --card-bg: rgba(18, 18, 18, 0.9);  /* 暗色模式卡片背景 */
+}
+:root {
+    --light_bg_color: rgba(255, 255, 255, 0.9);
+    --dark_bg_color: rgba(18, 18, 18, 0.9);
+    --light_page_color: rgba(255, 255, 255, 0.9);
+    --dark_page_color: rgba(18, 18, 18, 0.9);
+}
+
+
+/* 修改顶部进度条的颜色和宽度-------------------------------------------------------------------- */
+    /* .pace .pace-progress {
+        background: #ffffff; 
+        height: 3px;
+    }
+    .pace .pace-progress-inner {
+         box-shadow: 0 0 10px #1E92FB, 0 0 5px     #ffffff; 
+    }*/
+    .pace .pace-activity {
+        border-top-color: #ffffff;    
+        border-left-color: #ffffff;    
+    } 
+
+    .pace .pace-progress {
+        background: #ffffff !important; /* 蓝色进度条 */
+        height: 5px !important;         /* 改成你想要的宽度 */
+}
+
+
