@@ -1,0 +1,526 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>搜广推笔记 多目标排序 | Kyoku's Blog</title><meta name="author" content="Yuanpeng QU"><meta name="copyright" content="Yuanpeng QU"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="搜广推[多目标排序]Created by: Yuanpeng QUCreated time: 2025年8月10日 21:12 第一部分：多目标学习的核心挑战与基础1. 动机：为何需要多目标学习？现代工业级推荐系统（如电商、短视频）的目标是综合性的，不能只关注单一指标 。例如，一个短视频推荐系统不仅要优化点击率，可能还要同时提升用户的点赞、关注、转发、评论率以及观看时长 。 如果为每个任务单独建模">
+<meta property="og:type" content="article">
+<meta property="og:title" content="搜广推笔记 多目标排序">
+<meta property="og:url" content="https://qyp9909.github.io/2025/08/10/Rec_AD_MTL/index.html">
+<meta property="og:site_name" content="Kyoku&#39;s Blog">
+<meta property="og:description" content="搜广推[多目标排序]Created by: Yuanpeng QUCreated time: 2025年8月10日 21:12 第一部分：多目标学习的核心挑战与基础1. 动机：为何需要多目标学习？现代工业级推荐系统（如电商、短视频）的目标是综合性的，不能只关注单一指标 。例如，一个短视频推荐系统不仅要优化点击率，可能还要同时提升用户的点赞、关注、转发、评论率以及观看时长 。 如果为每个任务单独建模">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://qyp9909.github.io/images/cover/Rec_AD_Cover.png">
+<meta property="article:published_time" content="2025-08-10T09:00:00.000Z">
+<meta property="article:modified_time" content="2025-08-11T08:17:48.461Z">
+<meta property="article:author" content="Yuanpeng QU">
+<meta property="article:tag" content="Study">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://qyp9909.github.io/images/cover/Rec_AD_Cover.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "搜广推笔记 多目标排序",
+  "url": "https://qyp9909.github.io/2025/08/10/Rec_AD_MTL/",
+  "image": "https://qyp9909.github.io/images/cover/Rec_AD_Cover.png",
+  "datePublished": "2025-08-10T09:00:00.000Z",
+  "dateModified": "2025-08-11T08:17:48.461Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Yuanpeng QU",
+      "url": "https://qyp9909.github.io/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://qyp9909.github.io/2025/08/10/Rec_AD_MTL/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: 'Copy Successful',
+    error: 'Copy Failed',
+    noSupport: 'Browser Not Supported'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: 'days',
+  dateSuffix: {
+    just: 'Just now',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: {"chs_to_cht":"You have switched to Traditional Chinese","cht_to_chs":"You have switched to Simplified Chinese","day_to_night":"You have switched to Dark Mode","night_to_day":"You have switched to Light Mode","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"bottom-left"},
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: 'Load More'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '搜广推笔记 多目标排序',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" media="defer" onload="this.media='all'"><link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet"><link rel="stylesheet" href="/css/custom.css"  media="defer" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/HCLonely/images@master/others/heartbeat.min.css"><link rel="preload" as="image" href="/img/1.jpg"><link rel="preload" href="/fonts/circle400w.ttf" as="font" type="font/ttf" crossorigin="anonymous"><meta name="generator" content="Hexo 7.3.0"></head><body><script>window.paceOptions = {
+  restartOnPushState: false
+}
+
+btf.addGlobalFn('pjaxSend', () => {
+  Pace.restart()
+}, 'pace_restart')
+
+</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js/themes/blue/pace-theme-minimal.min.css"/><script src="https://cdn.jsdelivr.net/npm/pace-js/pace.min.js"></script><div id="web_bg" style="background-image: url(/img/1.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/LOGO.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">13</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">4</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">5</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-vihara"></i><span> Home</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-newspaper"></i><span> Articles</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-mug-hot"></i><span> Life</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/gallery/"><i class="fa-fw fas fa-camera-retro"></i><span> Gallery</span></a></li><li><a class="site-page child" href="/music/"><i class="fa-fw fab fa-itunes-note"></i><span> Music</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fab fa-youtube"></i><span> Movie</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-torii-gate"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-star-of-david"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">Kyoku's Blog</span></a><a class="nav-page-title" href="/"><span class="site-name">搜广推笔记 多目标排序</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-vihara"></i><span> Home</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-newspaper"></i><span> Articles</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-mug-hot"></i><span> Life</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/gallery/"><i class="fa-fw fas fa-camera-retro"></i><span> Gallery</span></a></li><li><a class="site-page child" href="/music/"><i class="fa-fw fab fa-itunes-note"></i><span> Music</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fab fa-youtube"></i><span> Movie</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-torii-gate"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-star-of-david"></i><span> About</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">搜广推笔记 多目标排序</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2025-08-10T09:00:00.000Z" title="Created 2025-08-10 18:00:00">2025-08-10</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2025-08-11T08:17:48.461Z" title="Updated 2025-08-11 17:17:48">2025-08-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Recsys/">Recsys</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post Views:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h3 id="搜广推-多目标排序"><a href="#搜广推-多目标排序" class="headerlink" title="搜广推[多目标排序]"></a>搜广推[多目标排序]</h3><p>Created by: Yuanpeng QU<br>Created time: 2025年8月10日 21:12</p>
+<h3 id="第一部分：多目标学习的核心挑战与基础"><a href="#第一部分：多目标学习的核心挑战与基础" class="headerlink" title="第一部分：多目标学习的核心挑战与基础"></a><strong>第一部分：多目标学习的核心挑战与基础</strong></h3><h3 id="1-动机：为何需要多目标学习？"><a href="#1-动机：为何需要多目标学习？" class="headerlink" title="1. 动机：为何需要多目标学习？"></a><strong>1. 动机：为何需要多目标学习？</strong></h3><p>现代工业级推荐系统（如电商、短视频）的目标是综合性的，不能只关注单一指标 。例如，一个短视频推荐系统不仅要优化点击率，可能还要同时提升用户的点赞、关注、转发、评论率以及观看时长 。</p>
+<p>如果为每个任务单独建模和优化，或者用一个简单的模型直接预测所有任务，就会遇到**<code>“跷跷板效应” (Seesaw Phenomenon)</code>** 。</p>
+<ul>
+<li><strong>定义</strong>：<strong>指的是当模型在优化一个目标时，会导致另一个或多个其他目标的性能下降的现象</strong> 。</li>
+<li><strong>举例</strong>：<ul>
+<li><strong>任务跷跷板 (Task Seesaw)</strong>：一个模型如果过度优化点击率（CTR），可能会倾向于推荐标题党或封面吸引人的内容，但这部分内容的用户实际满意度（如观看时长、点赞率）可能很低，从而损害了长期用户体验 。</li>
+<li><strong>领域跷跷板 (Domain Seesaw)</strong>：在多场景（多领域）推荐中，由于不同场景的用户群体和行为分布不同，一个模型在优化A场景（如“发现页”）的性能时，可能会损害其在B场景（如“精选页”）的推荐效果 。</li>
+</ul>
+</li>
+<li><strong>结论</strong>：单任务优化的局限性在于它忽略了任务间的关联和冲突。因此，必须采用多目标学习（Multi-Task Learning），通过设计更精巧的模型来平衡不同目标，在多个维度上共同提升，实现全局最优。</li>
+</ul>
+<h3 id="2-核心痛点一：样本选择偏差-Sample-Selection-Bias-SSB"><a href="#2-核心痛点一：样本选择偏差-Sample-Selection-Bias-SSB" class="headerlink" title="2. 核心痛点一：样本选择偏差 (Sample Selection Bias, SSB)"></a><strong>2. 核心痛点一：样本选择偏差 (Sample Selection Bias, SSB)</strong></h3><p>SSB问题是多目标学习，特别是涉及用户序贯行为（sequential behaviors）时，最经典也最核心的挑战之一。</p>
+<ul>
+<li><strong>定义</strong>：指模型在训练时所用的数据集分布，与在真实环境中进行预测时所面对的数据集分布不一致，从而导致模型产生预测偏差。</li>
+<li><strong>以CVR（点击后转化率）预估为例</strong>：<ol>
+<li><strong>训练空间 (Training Space)</strong>：CVR的定义是“用户在<strong>点击</strong>商品之后发生转化的概率”，即 <code>P(conversion | click=1)</code>。因此，传统的CVR模型，其训练样本天然就是<strong>所有被点击过的商品</strong>。其中，点击后转化的为正样本，点击后未转化的为负样本。</li>
+<li><strong>预测空间 (Inference Space)</strong>：在实际线上服务时，系统需要对<strong>所有被曝光的商品</strong>进行打分，以便用 <code>pCTR × pCVR</code> 这样的公式来预估其最终价值并排序。此时，模型需要预测的是所有曝光商品的CVR，无论它们是否被点击。</li>
+<li><strong>偏差的产生</strong>：模型只在“点击”这个有偏的样本空间上学习了如何区分转化与否，但却被要求在“曝光”这个全量的、无偏的样本空间上做预测。模型没有见过那些“未被点击”的样本，无法准确判断它们的转化潜力，因此做出的预测是有偏的、不准确的。</li>
+</ol>
+</li>
+<li><strong>结论</strong>：SSB问题会导致模型对物品的价值预估不准，是序贯多目标任务中必须解决的基础性难题。这也是ESMM这类模型被提出的直接原因。</li>
+</ul>
+<h3 id="3-核心痛点二：任务间冲突与负迁移-Negative-Transfer"><a href="#3-核心痛点二：任务间冲突与负迁移-Negative-Transfer" class="headerlink" title="3. 核心痛点二：任务间冲突与负迁移 (Negative Transfer)"></a><strong>3. 核心痛点二：任务间冲突与负迁移 (Negative Transfer)</strong></h3><p>在多任务学习中，我们期望不同任务能互相借鉴，共同进步（正迁移）。但实际情况中，常常会因为任务间的冲突导致互相“拖后腿”，即<strong>负迁移</strong>。</p>
+<ul>
+<li><strong>根源：梯度冲突 (Gradient Conflict)</strong><ul>
+<li>在拥有共享参数（如Shared-Bottom的底层网络或MMoE的共享专家）的模型中，不同任务为了最小化各自的损失函数，<strong>可能会对同一个共享参数产生方向相反的更新需求</strong>。</li>
+<li><strong>举例</strong>：假设任务A（如点击率）的优化需要增大某个参数，而任务B（如观看时长）的优化需要减小同一个参数。在更新时，这个共享参数就会陷入“拉锯战”，最终的更新结果可能对两个任务都不是最优的，从而导致性能受损。</li>
+</ul>
+</li>
+<li><strong>“双重跷跷板效应” (Imperfectly Double Seesaw Phenomenon)</strong><ul>
+<li>这是快手在PEPNet论文中提出的一个更贴近工业界真实场景的概念，它是两种“跷跷板效应”的叠加 。</li>
+<li><strong>任务跷跷板 (Task Seesaw)</strong>：指前述的不同任务之间的冲突，尤其是在任务目标稀疏度不同时，模型很容易偏向于拟合更简单的任务，而忽略稀疏任务 。</li>
+<li><strong>领域跷跷板 (Domain Seesaw)</strong>：指在不同推荐场景（领域）下，由于数据分布、用户意图存在差异，导致模型无法同时在所有领域都取得好效果的现象 。</li>
+<li>当这两种冲突同时存在时，问题就变得更加复杂，形成了“双重跷跷板效应” 。这也是催生出MMoE、PLE、PEPNet等更先进模型以及PCGrad等优化算法的直接原因。</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-核心痛点三：稀疏任务的“梯度消失”问题"><a href="#4-核心痛点三：稀疏任务的“梯度消失”问题" class="headerlink" title="4. 核心痛点三：稀疏任务的“梯度消失”问题"></a><strong>4. 核心痛点三：稀疏任务的“梯度消失”问题</strong></h3><p>这是一个在计算广告和推荐系统中非常具体且常见的问题，尤其是在CTR（点击率）预估这类正样本极其稀疏的任务中。</p>
+<ul>
+<li><strong>问题描述：以CTR任务为例</strong><ul>
+<li>CTR任务通常使用LogLoss作为损失函数，其对模型logits输出<code>z</code>的梯度为 <code>p - y</code>，其中<code>p</code>是模型预测的点击概率，<code>y</code>是真实标签（0或1）。</li>
+<li><strong>对于负样本 (y&#x3D;0)</strong>：梯度为<code>p</code>。由于点击率通常非常低（例如<code>p &lt; 0.01</code>），这意味着占数据总量99%以上的负样本，在反向传播时产生的梯度信号极其微弱。模型几乎“忽略”了这些负样本提供的信息，导致学习不充分。</li>
+<li><strong>对于正样本 (y&#x3D;1)</strong>：梯度为<code>p - 1</code>。当模型预测不准时（<code>p</code>接近0），梯度接近-1，这是一个非常强的更新信号。</li>
+<li><strong>结论</strong>：正负样本对模型更新的贡献极度不平衡，模型很难从海量的负样本中学到有效信息。</li>
+</ul>
+</li>
+<li><strong>基础解决方案：使用Rank-style或对比学习类损失函数</strong><ul>
+<li><strong>核心思想</strong>：改变优化目标，从“精确预测每个样本的绝对概率”转向“正确预估正负样本对的相对顺序”。</li>
+<li><strong>以RankNet Loss为例</strong>：其损失函数为 <code>L_Rank = -ln(σ(s+ - s-))</code>，其中<code>s+</code>和<code>s-</code>分别是正负样本的得分。</li>
+<li><strong>优势</strong>：在这种损失下，对负样本得分<code>s-</code>的梯度取决于正负样本的<strong>得分差</strong>，而不是<code>s-</code>本身的大小。即使<code>s-</code>很小，只要它和<code>s+</code>的差距不够大，模型依然能收到一个很强的“把<code>s-</code>降得更低”的梯度信号，从而能更充分地从负样本中学习，缓解梯度消失问题。</li>
+</ul>
+</li>
+</ul>
+<h3 id="第二部分：经典与前沿的多目标模型架构"><a href="#第二部分：经典与前沿的多目标模型架构" class="headerlink" title="第二部分：经典与前沿的多目标模型架构"></a><strong>第二部分：经典与前沿的多目标模型架构</strong></h3><h3 id="1-ESMM-Entire-Space-Multi-task-Model-：专门解决SSB问题"><a href="#1-ESMM-Entire-Space-Multi-task-Model-：专门解决SSB问题" class="headerlink" title="1. ESMM (Entire Space Multi-task Model)：专门解决SSB问题"></a><strong>1. ESMM (Entire Space Multi-task Model)</strong>：专门解决SSB问题</h3><p>ESMM是阿里巴巴在2018年提出的一个影响深远的模型，它的设计目标非常明确，就是为了解决在序贯行为（如“曝光 -&gt; 点击 -&gt; 转化”）中普遍存在的**样本选择偏差（SSB）**问题。</p>
+<p><strong>1.1 背景：为何需要ESMM？</strong></p>
+<p>正如我们第一部分所讨论的，SSB问题的根源在于CVR（点击后转化率）模型的<strong>训练空间</strong>（被点击过的样本）和<strong>预测空间</strong>（所有被曝光的样本）不一致。这导致传统CVR模型预估出来的转化率是有偏的，无法直接在全量商品排序中准确使用。</p>
+<p>ESMM的提出，就是为了解决这个偏差，得到一个可以在**全样本空间（Entire Space）**上使用的、无偏的CVR预估值。</p>
+<p><strong>1.2 ESMM的核心思想：在全空间建模</strong></p>
+<p>ESMM的思路非常巧妙，它没有试图去“修正”有偏差的训练数据，而是通过一个数学上的恒等关系，从根本上改变了学习的目标。</p>
+<ul>
+<li><p><strong>核心恒等式</strong>：模型认识到，用户的“曝光后即转化”行为，可以被分解为“先点击”和“点击后转化”两个连续的事件。用概率公式表达就是 ：</p>
+<p>  <code>p(转化 | 曝光) = p(点击 | 曝光) × p(转化 | 曝光, 点击)</code></p>
+</li>
+<li><p><strong>转化为模型术语</strong>：这个公式可以被直接翻译成我们熟悉的三个预估任务 ：</p>
+<p>  $$<br>  pCTCVR&#x3D;pCTR×pCVR<br>  $$</p>
+<ul>
+<li><strong>pCTR</strong> (Click-Through Rate): 点击率，可以在<strong>全曝光样本空间</strong>上建模。</li>
+<li><strong>pCVR</strong> (Conversion Rate): 点击后转化率，这是我们真正关心但有偏差的目标。</li>
+<li><strong>pCTCVR</strong> (Click-Through &amp; Conversion Rate): 曝光后“既点击又转化”的概率，也可以在<strong>全曝光样本空间</strong>上建模。</li>
+</ul>
+<p>  ESMM的洞见在于，既然pCTR和pCTCVR都可以在全空间上进行无偏的学习，我们就可以利用这个等式关系，来“约束”和“求解”出那个无偏的pCVR。</p>
+</li>
+</ul>
+<p><strong>1.3 ESMM的架构与关键机制</strong></p>
+<p>为了实现上述思想，ESMM设计了一个简洁而有效的双塔结构。</p>
+<ul>
+<li><p><strong>双塔结构 (Two-Tower Architecture)</strong>：</p>
+<ul>
+<li><strong>CTR塔</strong>：一个独立的子网络，输入特征，输出预估的<code>pCTR</code>。</li>
+<li><strong>CVR塔</strong>：另一个独立的子网络，输入相同的特征，输出预估的<code>pCVR</code>。</li>
+<li>这两个塔通常共享底层的Embedding层，以学习通用的特征表示。</li>
+</ul>
+</li>
+<li><p><strong>损失函数与隐式训练 (Loss Function &amp; Implicit Training)</strong>：<br>这是ESMM的“魔法”所在。它的总损失函数由两部分构成：</p>
+<p>  $$<br>  L_{total}&#x3D;L_{CTR}+L_{CTCVR}<br>  $$</p>
+<ul>
+<li><code>L_CTR</code>：CTR任务的损失。用<strong>CTR塔</strong>的输出<code>pCTR</code>和真实的点击标签<code>y_click</code>计算。</li>
+<li><code>L_CTCVR</code>：CTCVR任务的损失。用<strong>CTR塔和CVR塔输出的乘积</strong> <code>pCTR × pCVR</code> 和真实的“点击且转化”标签<code>y_conversion</code>计算。</li>
+</ul>
+<p>  <strong>关键机制</strong>：请注意，整个训练过程中，<strong>没有任何损失函数是直接作用于CVR塔的输出<code>pCVR</code>上的</strong>。CVR塔的参数更新，其梯度完全来自于<code>L_CTCVR</code>，并通过那个乘法节点反向传播回来。</p>
+<p>  这种**“隐式训练”**的方式，强迫CVR塔必须学习到一个能在全空间上都成立的<code>pCVR</code>。因为只有这样，它与<code>pCTR</code>相乘后才能最好地拟合在全空间上观测到的<code>pCTCVR</code>。这就从机制上保证了我们最终得到的<code>pCVR</code>是无偏的，完美地解决了SSB问题。</p>
+</li>
+</ul>
+<p><strong>1.4 总结</strong></p>
+<ul>
+<li><strong>目标</strong>：专门解决序贯任务中的样本选择偏差（SSB）问题。</li>
+<li><strong>思想</strong>：利用<code>pCTCVR = pCTR × pCVR</code>的恒等式，在全样本空间上进行建模。</li>
+<li><strong>机制</strong>：通过一个共享底层的双塔结构，联合优化CTR和CTCVR两个任务的损失，从而对CVR塔进行<strong>隐式监督</strong>，最终得到无偏的CVR预估值。</li>
+</ul>
+<h3 id="2-MMoE-Multi-gate-Mixture-of-Experts-：经典的任务间信息选择与共享模型"><a href="#2-MMoE-Multi-gate-Mixture-of-Experts-：经典的任务间信息选择与共享模型" class="headerlink" title="2. MMoE (Multi-gate Mixture-of-Experts)：经典的任务间信息选择与共享模型"></a><strong>2. MMoE (Multi-gate Mixture-of-Experts)</strong>：经典的任务间信息选择与共享模型</h3><p>MMoE是Google在2018年提出的一个里程碑式的多任务学习模型。它的设计目标非常明确，就是为了解决多任务学习中最常见的**“负迁移”<strong>或</strong>“跷跷板效应”**问题。</p>
+<p><strong>2.1 背景：为何需要MMoE？</strong></p>
+<p>在MMoE之前，最流行的多任务学习架构是<strong>Shared-Bottom</strong>，即所有任务共享一个底层的特征提取网络，然后各自连接一个独立的任务塔。这种硬参数共享的方式过于“一刀切”，它强迫所有任务（无论相关性高低）都使用同一套特征表示。当任务间差异较大时，就会产生我们之前讨论的“梯度冲突”和“跷跷-板效应”，模型性能受损。MMoE的提出，就是为了用一种更“柔软”、更智能的方式来处理任务间的信息共享。</p>
+<p><strong>2.2 MMoE的核心思想与架构</strong></p>
+<p>MMoE的核心思想是**“混合专家” (Mixture of Experts)**，它借鉴了MoE架构并针对多任务场景进行了关键创新。</p>
+<ul>
+<li><p><strong>架构组成</strong>：</p>
+<ol>
+<li><strong>多个共享的专家网络 (Shared Experts)</strong>：模型底层不再是单个共享网络，而是并行的、多个结构相同但参数不共享的“专家”子网络。每个专家都可以被看作一个独立的特征提取器，它们从不同角度去理解输入信息。</li>
+<li><strong>多个独立的门控网络 (Gating Networks)</strong>：这是MMoE最关键的创新。它为<strong>每一个任务都配备了一个独立的、轻量的门控网络</strong>。</li>
+</ol>
+</li>
+<li><p><strong>工作流程</strong>：</p>
+<p>  <img src="/.io//image.png" alt="image.png"></p>
+<ol>
+<li>当一个样本输入时，它会被<strong>同时送往所有的专家网络和所有的门控网络</strong>。</li>
+<li>每个专家网络输出一个特征向量。</li>
+<li><strong>每个任务的专属门控网络</strong>会输出一组权重（经过Softmax函数，所以权重之和为1）。</li>
+<li>对于某个特定任务（如CTR），模型会用其专属门控网络产生的权重，对所有专家的输出向量进行<strong>加权求和</strong>，形成一个为CTR任务量身定制的融合特征。</li>
+<li>这个融合后的特征再被送入CTR专属的任务塔，得到最终的预测值。其他任务（如CVR）也依此类推，使用自己的门控权重进行融合。</li>
+</ol>
+<p>  <img src="/.io//image%201.png" alt="image.png">
+  </p>
+</li>
+<li><p><strong>优势</strong>：通过为每个任务分配独立的门控，MMoE可以显式地学习任务间的关系 。如果两个任务相关性高，它们的门控网络就可能学习到相似的权重分布，从而共享更多的专家信息；如果任务相关性低，它们的门控网络就可以学习到差异化的权重，有效避免不相干信息的干扰，从而缓解负迁移问题。</p>
+</li>
+</ul>
+<p><strong>2.3 工程实践：用Dropout解决“门控极化”问题</strong></p>
+<p>在实际训练中，MMoE可能会出现一个问题，即“门控极化” (Gate Polarization)。</p>
+<ul>
+<li><strong>问题描述</strong>：某个任务的门控网络在训练中变得“过于自信”，其Softmax输出的权重变得非常极端，比如<code>[0, 0, 1, 0]</code>。这意味着这个任务几乎只从一个专家那里学习信息，而<strong>完全忽略了其他专家</strong>。</li>
+<li><strong>后果</strong>：这使得MMoE模型退化成了一个普通的单网络模型，失去了“混合专家”的优势，可能重新引发“跷跷板效应”。</li>
+<li><strong>解决方案</strong>：对Softmax的输出使用<strong>Dropout</strong>。在训练时，随机地将门控网络输出权重向量中的某些值置为0（例如，每个权重有10%的概率被mask）。</li>
+<li><strong>作用</strong>：这种做法强迫模型不能过度依赖任何一个专家。即使模型想让权重极化成<code>[0, 0, 1, 0]</code>，那个唯一的<code>1</code>也有概率被dropout掉，从而迫使模型必须学会利用其他专家来进行“备份”，最终学习到更健壮、更多样化的专家组合策略。比如<code>[0.1, 0.2, 0.5, 0.2]</code> 更加平滑鲁棒。</li>
+</ul>
+<p><strong>2.4 总结</strong></p>
+<ul>
+<li><strong>目标</strong>：解决多任务学习中的负迁移（“跷跷板效应”）问题。</li>
+<li><strong>思想</strong>：用一种软参数共享的方式，让不同任务有选择性地共享信息。</li>
+<li><strong>机制</strong>：通过“<strong>多个共享专家网络 + 每个任务独立的门控网络</strong>”的结构，为每个任务学习一套专属的专家组合权重。</li>
+<li><strong>实践</strong>：通过在门控输出上施加<strong>Dropout</strong>来防止“门控极化”，增强模型鲁棒性。</li>
+</ul>
+<h3 id="3-PLE-Progressive-Layered-Extraction-：MMoE的进阶版"><a href="#3-PLE-Progressive-Layered-Extraction-：MMoE的进阶版" class="headerlink" title="3. PLE (Progressive Layered Extraction)：MMoE的进阶版"></a><strong>3. PLE (Progressive Layered Extraction)</strong>：MMoE的进阶版</h3><p>PLE是腾讯PCG在2020年提出的，可以看作是MMoE的一个重要演进和增强版本。它针对MMoE的一些潜在局限性进行了改进，并整合了解决SSB问题的方案，使其成为一个更强大、更全面的多任务学习框架。</p>
+<p><strong>3.1 背景：为何需要PLE？——MMoE的局限性</strong></p>
+<p>我们在之前的讨论中提到，MMoE通过多个门控网络来选择性地组合一系列<strong>共享专家</strong>的输出。这里的关键在于，所有的专家都是<strong>共享</strong>的。</p>
+<ul>
+<li><strong>MMoE的局限</strong>：如果不同任务之间的差异非常大，可能需要的特征也大相径庭。在这种情况下，仅仅依靠“重新组合”共享的特征可能是不够的。用之前图片中的比喻就是，MMoE能改变“厨师”的配方，但无法改变“菜品”本身。模型缺少为某个任务“开小灶”，学习独有特征的能力。</li>
+</ul>
+<p>PLE正是为了解决这个问题而设计的。</p>
+<p><strong>3.2 PLE的核心思想与架构</strong></p>
+<p>PLE引入了两个核心的创新点，使其比MMoE更加灵活和强大。</p>
+<ul>
+<li><strong>核心思想：引入“任务专属专家”与“共享专家”的组合</strong><ul>
+<li>这是PLE对MMoE最直接的改进。在PLE的网络结构中，专家被分成了两类：<ol>
+<li><strong>共享专家 (Shared Experts)</strong>：和MMoE中的专家一样，所有任务都可以使用它们，用于学习通用的模式。</li>
+<li><strong>任务专属专家 (Task-specific Experts)</strong>：为每一个任务都配备一组自己私有的专家。这些专家只为当前任务服务，用于学习该任务独特的、个性化的特征。</li>
+</ol>
+</li>
+<li>这种设计使得模型既能捕捉任务间的共性，又能保留每个任务的个性，大大增强了模型的表达能力。</li>
+</ul>
+</li>
+<li><strong>关键机制一：渐进式分层抽取结构 (Progressive Layered Extraction)</strong><ul>
+<li>这是PLE名字的由来，也是其结构上的最大特点。PLE的网络不是单层的，而是<strong>多层堆叠的</strong>。</li>
+<li><strong>信息流动方式</strong>：第一层网络（包含共享专家和各任务的专属专家）的输出，并不会直接用于最终的预测。相反，它们会被汇集起来，作为<strong>第二层网络的输入</strong>。</li>
+<li><strong>逐层抽象</strong>：通过这种方式，PLE构建了一个从底层到高层、对特征进行渐进式加工和抽取的信息流。高层网络可以基于低层网络已经融合过的、更抽象的特征来做进一步的信息交互和选择，从而能学习到任务间更复杂、更深层次的关系。</li>
+</ul>
+</li>
+</ul>
+<p><strong>3.3 PLE的关键机制二：一个模型解决两大难题</strong></p>
+<p>PLE的强大之处在于，它通过一个统一的框架，同时解决了多任务学习中的两个核心痛点。</p>
+<ol>
+<li><strong>解决负迁移</strong>：通过“专属专家+共享专家”的精巧结构，以及门控的选择机制，PLE可以非常灵活地处理任务间的关系，有效隔离冲突，促进共享，从而缓解“跷跷板效应”。</li>
+<li><strong>解决样本选择偏差 (SSB)</strong>：PLE在其损失函数的设计中，明确地引入了<strong>Mask（掩码）机制</strong>。<ul>
+<li><p><strong>损失函数</strong>：</p>
+<p>  <img src="/.io//image%202.png" alt="image.png"></p>
+</li>
+<li><p><strong>机制解读</strong>：在计算任务<code>k</code>的损失时，只有当样本<code>i</code>属于任务<code>k</code>的有效训练样本时，其掩码<code>δ_i^k</code>才为1，否则为0。例如，在计算CVR任务的loss时，只有那些被点击过的样本才会被纳入计算。</p>
+</li>
+<li><p><strong>效果</strong>：这个机制从根本上解决了不同任务训练样本空间不一致的问题，使得PLE可以优雅地处理像CTR-CVR预估这类存在SSB问题的序贯任务。</p>
+</li>
+</ul>
+</li>
+</ol>
+<p><strong>3.4 总结</strong></p>
+<ul>
+<li><strong>定位</strong>：MMoE的进阶版，一个更强大、更全面的多任务学习框架。</li>
+<li><strong>核心改进</strong>：引入了“<strong>任务专属专家</strong>”，打破了MMoE中专家必须全部共享的限制。</li>
+<li><strong>核心架构</strong>：采用<strong>渐进式的分层结构</strong>，实现对特征的逐层抽象和抽取。</li>
+<li><strong>综合能力</strong>：通过其网络结构缓解了<strong>负迁移</strong>问题，同时通过<strong>Masked Loss</strong>解决了**样本选择偏差（SSB）**问题，是一个“一站式”的解决方案。</li>
+</ul>
+<h3 id="4-PEPNet-Parameter-and-Embedding-Personalized-Network-：快手提出的个性化多任务多域模型"><a href="#4-PEPNet-Parameter-and-Embedding-Personalized-Network-：快手提出的个性化多任务多域模型" class="headerlink" title="4. PEPNet (Parameter and Embedding Personalized Network)：快手提出的个性化多任务多域模型"></a><strong>4. PEPNet (Parameter and Embedding Personalized Network)</strong>：快手提出的个性化多任务多域模型</h3><p>PEPNet是快手在2023年KDD会议上提出的一个SOTA（State-of-the-art）模型，它为解决工业界复杂的<strong>多任务、多领域</strong>推荐问题提供了一个新颖且高效的思路。</p>
+<p><strong>4.1 背景：为何需要PEPNet？——直面“双重跷跷板效应”</strong></p>
+<p>正如我们在第一部分所讨论的，工业级推荐系统面临着“任务跷跷板”和“领域跷跷板”的双重挑战。PEPNet的论文将这种复杂的现象命名为**“不完美的双重跷跷板效应” (Imperfectly Double Seesaw Phenomenon)** 。现有的模型如MMoE或PLE虽然在解决任务冲突上很有效，但在直接扩展到多领域时，仍然可能因为领域间的巨大差异而表现不佳 。PEPNet的目标就是同时缓解这两种冲突。</p>
+<p><strong>4.2 PEPNet的核心思想：注入个性化先验</strong></p>
+<p>与MMoE、PLE等模型专注于设计更精巧的主干网络结构不同，PEPNet的核心思想是作为一个**“即插即用” (plug-and-play)** 的模块，可以被注入到任何模型中 。</p>
+<p>它的策略是，充分利用各种<strong>个性化的先验信息</strong>（如用户画像、物品属性、领域特征等），通过门控机制，对一个基础的多任务模型进行<strong>动态的、精细化的调整</strong> 。</p>
+<p><strong>4.3 PEPNet的关键机制：双管齐下</strong></p>
+<p>PEPNet通过两个子网络EPNet和PPNet，分别应对“领域”和“任务”的挑战。</p>
+<p><img src="/.io//image%203.png" alt="image.png"></p>
+<ul>
+<li><p><strong>机制一：EPNet (Embedding Personalized Network) —— 解决“域”问题</strong></p>
+<ul>
+<li><p><strong>目标</strong>：为不同领域中的不同用户，融合具有不同重要性的特征，解决“领域跷跷板” 。</p>
+</li>
+<li><p><strong>工作机制</strong>：EPNet使用<strong>领域相关的特征</strong>（如domain ID，用户在该域的交互次数等）作为其门控单元（Gate NU）的输入 。这个门控单元会生成一个与Embedding层维度相同的门控向量，然后通过</p>
+<p>  <strong>按元素相乘</strong>的方式，作用于共享的Embedding层，从而为不同的领域生成一套专属的、个性化的Embedding表示 。</p>
+</li>
+</ul>
+</li>
+<li><p><strong>机制二：PPNet (Parameter Personalized Network) —— 解决“任务”问题</strong></p>
+<ul>
+<li><p><strong>目标</strong>：为不同任务中的不同用户，平衡稀疏度不同的目标，解决“任务跷跷板” 。</p>
+</li>
+<li><p><strong>工作机制</strong>：PPNet使用<strong>用户&#x2F;物品&#x2F;作者相关的通用个性化特征</strong>（如user ID, item ID, user age等）作为其门控单元的输入 。这些门控单元会为DNN任务塔的</p>
+<p>  <strong>每一层</strong>都生成一个门控向量，然后通过<strong>按元素相乘</strong>的方式，作用于该层网络的隐层激活值上 。这相当于为每个用户的每次预测，都动态调整了DNN任务塔每一层的“神经元”的激活强度，实现了非常精细的个性化调控。</p>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>4.4 灵感来源：Gate NU与LHUC算法</strong></p>
+<p>您总结得非常准确，PEPNet中这种在DNN每一层进行参数调控的核心思想，其直接灵感来自于</p>
+<p><strong>语音识别领域的LHUC算法 (Learning Hidden Unit Contributions)</strong> 。</p>
+<ul>
+<li><strong>思想迁移</strong>：LHUC算法通过学习一个说话人专属的门控，来缩放（scale）声学模型中隐藏层的单元，从而提升对不同说话人语音的识别准确率 。PEPNet巧妙地将这种思想迁移过来：PPNet通过学习一个用户&#x2F;物品专属的门控，来缩放推荐模型中任务塔隐藏层的单元，从而提升对不同用户在不同任务上的预测准确率 。</li>
+<li><strong>Gate NU</strong>：这个基础的门控单元本身，通常采用一个**“先降维、后升维”**的两层MLP瓶颈结构，以保证高效和轻量。其输出层通常使用<code>γ*Sigmoid</code>（<code>γ</code>常设为2）作为激活函数，使得门控既能抑制（输出&lt;1）又能增强（输出&gt;1）信号，比普通门控更灵活 。</li>
+</ul>
+<p><strong>4.5 总结</strong></p>
+<ul>
+<li><strong>定位</strong>：快手提出的，一个用于解决复杂<strong>多任务、多领域</strong>问题的SOTA工业级解决方案。</li>
+<li><strong>核心问题</strong>：针对“<strong>不完美的双重跷跷板效应</strong>”。</li>
+<li><strong>核心策略</strong>：作为一个<strong>即插即用</strong>的模块，通过<strong>注入个性化先验信息</strong>来动态调控主干模型。</li>
+<li><strong>关键机制</strong>：<ul>
+<li><strong>EPNet</strong>：在<strong>Embedding层</strong>进行“领域”级别的个性化。</li>
+<li><strong>PPNet</strong>：在<strong>DNN任务塔的每一层</strong>进行“任务”级别的个性化。</li>
+</ul>
+</li>
+<li><strong>灵感来源</strong>：其核心的层层调控机制源于语音识别领域的<strong>LHUC算法</strong>。</li>
+</ul>
+<h3 id="5-STAR-Star-Topology-Adaptive-Recommender-：阿里提出的多领域CTR模型"><a href="#5-STAR-Star-Topology-Adaptive-Recommender-：阿里提出的多领域CTR模型" class="headerlink" title="5. STAR (Star Topology Adaptive Recommender)：阿里提出的多领域CTR模型"></a><strong>5. STAR (Star Topology Adaptive Recommender)</strong>：阿里提出的多领域CTR模型</h3><p>STAR是阿里巴巴在2021年CIKM会议上提出的一个专门用于解决多领域（Multi-Domain）CTR预估问题的模型。它的核心在于如何优雅地处理不同领域之间的共性和差异性，以缓解“领域跷跷板”效应。</p>
+<p><strong>5.1 背景：为何需要STAR？——多领域推荐的挑战</strong></p>
+<p>在像淘宝这样的超级App中，存在多个推荐场景（领域），比如“猜你喜欢”、“购买后推荐”、“搜索结果页”等。这些领域的用户和物品有重叠，但用户的行为意图、物品的分布却有很大差异。STAR模型就是为了在这种复杂的环境下，构建一个统一的模型，既能利用所有领域的数据来增强学习效果，又能适应每个领域的独特特性。</p>
+<p><strong>5.2 STAR的核心思想：星形拓扑结构</strong></p>
+<p>为了平衡共性与个性，STAR模型设计了一种“中心-辐射”式的网络结构，即<strong>星形拓扑结构 (Star Topology)</strong>。</p>
+<ul>
+<li><strong>共享中心网络 (Shared Center Network)</strong>：作为“中心”，它负责学习所有领域都通用的底层知识和特征表示。这部分网络由所有领域的数据共同训练，实现了知识的迁移和共享。</li>
+<li><strong>领域特定网络 (Domain-specific Networks)</strong>：作为从中心“辐射”出去的分支，每个领域都拥有一个自己专属的网络。它负责学习该领域的个性化模式，捕捉其独有的特征。</li>
+<li><strong>优势</strong>：这种结构允许模型在共享参数的同时，也为每个领域分配了专属参数，从而能够灵活地适应不同领域的数据分布，有效缓解领域间的冲突和负迁移。</li>
+</ul>
+<p><strong>5.3 STAR的关键机制</strong></p>
+<p>除了宏观的星形拓扑结构，STAR还引入了两个非常精巧的关键机制来增强其领域自适应能力。</p>
+<ul>
+<li><strong>机制一：分区归一化 (Partitioned Normalization, PN)</strong><ul>
+<li><strong>问题</strong>：标准的批归一化（Batch Normalization, BN）假设一个批次内的数据来自同一分布，但在多领域场景下，一个批次内会混合来自不同领域、分布差异巨大的数据，这使得BN失效甚至起到反作用。</li>
+<li><strong>解决方案</strong>：PN在做归一化时，会先在批次内根据<strong>领域ID</strong>对数据进行分区。然后，它为每个分区（即每个领域）<strong>单独计算</strong>均值<code>μd</code>和方差<code>σd²</code>，并用这些领域专属的统计量来对该领域的数据进行归一化。</li>
+<li><strong>公式</strong>：<code>z&#39; = (γ · γd) * (z - μd) / sqrt(σd² + ε) + (β + βd)</code>。<ul>
+<li>这里的<code>γ</code>和<code>β</code>是全局共享的缩放和偏移参数，而<code>γd</code>和<code>βd</code>是为每个领域<code>d</code>学习的专属缩放和偏移参数。</li>
+</ul>
+</li>
+<li><strong>优势</strong>：PN能够精准地捕捉每个领域的真实数据分布，避免了不同领域统计信息的混乱，从而让模型训练更稳定，性能更好。</li>
+</ul>
+</li>
+<li><strong>机制二：辅助网络 (Auxiliary Network)</strong><ul>
+<li><strong>问题</strong>：模型很难自动、显式地学习到不同领域间的差异。如果仅把领域ID作为一个普通特征输入，其信号在经过多层网络后很容易被削弱。</li>
+<li><strong>解决方案</strong>：STAR引入了一个独立的辅助网络，专门用来建模领域差异。</li>
+<li><strong>机制</strong>：这个网络直接将<strong>领域指示器 (domain indicator)</strong> 作为输入，学习一个领域专属的嵌入向量。它的最终输出会<strong>直接与主网络的输出相加</strong>，共同形成最终的预测值。</li>
+<li><strong>优势</strong>：这种设计相当于为主模型的预测结果提供了一个<strong>可学习的、领域专属的偏置修正项 (Bias Correction)</strong>。它保证了领域信息能直接、有力地影响最终的预测结果，让模型对领域差异更加敏感。</li>
+</ul>
+</li>
+</ul>
+<p><strong>5.4 总结</strong></p>
+<ul>
+<li><strong>定位</strong>：阿里巴巴提出的，专门解决工业级多领域CTR预估问题的SOTA模型。</li>
+<li><strong>核心架构</strong>：<strong>星形拓扑结构</strong>，通过“共享中心网络+领域专属网络”来平衡知识共享与领域个性化。</li>
+<li><strong>关键机制</strong>：<ol>
+<li><strong>分区归一化 (PN)</strong>：一种领域感知的归一化方法，用于精确适配不同领域的数据分布。</li>
+<li><strong>辅助网络 (Auxiliary Network)</strong>：一个并行的旁路网络，用于为主模型提供一个显式的、领域专属的偏置修正。</li>
+</ol>
+</li>
+</ul>
+<h3 id="第三部分：多任务的进阶优化策略（模型之外）"><a href="#第三部分：多任务的进阶优化策略（模型之外）" class="headerlink" title="第三部分：多任务的进阶优化策略（模型之外）"></a><strong>第三部分：多任务的进阶优化策略（模型之外）</strong></h3><p>当我们确定了多任务学习的模型架构后（如MMoE或PLE），优化的过程本身也大有可为。这部分策略不改变模型结构，而是直接作用于模型的<strong>训练过程</strong>，通过更精细的手段来平衡不同任务，因此可以被看作是“模型之外”的通用优化技巧。</p>
+<h3 id="1-梯度层面：直接处理梯度冲突"><a href="#1-梯度层面：直接处理梯度冲突" class="headerlink" title="1. 梯度层面：直接处理梯度冲突"></a><strong>1. 梯度层面：直接处理梯度冲突</strong></h3><ul>
+<li><strong>背景：为何需要在梯度层面进行优化？</strong><ul>
+<li>我们之前反复提到，多任务学习的核心挑战之一是“负迁移”，其根本原因在于<strong>梯度冲突</strong>。在拥有共享参数的模型中，不同任务为了最小化各自的损失，在反向传播时可能会对同一个共享参数产生方向相反的更新需求（一个想让参数增大，另一个想让参数减小）。</li>
+<li>这种“拉锯战”会导致模型训练不稳定，收敛缓慢，并最终损害整体性能。梯度层面的优化策略，就是像一个“交通警察”一样，在参数更新前，主动地对这些冲突的“指令”进行协调和处理。</li>
+</ul>
+</li>
+</ul>
+<p><strong>1.1 梯度优化策略一：PCGrad (Projecting Conflicting Gradients)</strong></p>
+<ul>
+<li><strong>核心思想</strong>：“有冲突才调解，没冲突就放行”。它是一种相对温和的、只在必要时介入的策略。</li>
+<li><strong>工作机制</strong>：<ol>
+<li><strong>检测冲突</strong>：在每次参数更新前，算法会检查任意两个任务（如任务i和任务j）的梯度向量 <code>gi</code> 和 <code>gj</code>。它通过<strong>计算两个向量的余弦相似度（即点积）来判断方向</strong>。如果余弦相似度为<strong>负数</strong>，意味着两个梯度的夹角大于90度，方向存在明显的冲突。</li>
+<li><strong>解决冲突</strong>：一旦检测到冲突，PCGrad会进行一次“投影”操作。例如，它会将梯度<code>gi</code>中与<code>gj</code>方向相反的分量剔除掉，只保留与<code>gj</code>正交（不冲突）的分量。这可以理解为，它修改了<code>gi</code>，告诉它：“你可以朝自己的目标更新，但不要干扰任务j”。</li>
+<li><strong>更新参数</strong>：最后，使用这些经过“调解”和修正后的梯度来更新共享参数。</li>
+</ol>
+</li>
+<li><strong>优势</strong>：PCGrad的逻辑清晰，实现相对简单，能有效避免任务间最直接的相互损害。</li>
+</ul>
+<p><strong>1.2 梯度优化策略二：GradVec</strong></p>
+<ul>
+<li><strong>核心思想</strong>：不满足于仅仅被动地消除冲突，而是主动地去寻找一个对所有任务都尽可能公平的“共同前进”方向。</li>
+<li><strong>工作机制</strong>：<ul>
+<li>GradVec的目标是找到一个新的梯度向量<code>v</code>，这个<code>v</code>与<strong>所有单个任务</strong>的梯度<code>gi</code>都尽可能方向一致（即夹角尽可能小）。</li>
+<li>它不再是简单地对梯度进行“是&#x2F;否”冲突的判断和修正，而是将寻找最优更新方向本身，重新定义为一个优化问题。根据图片中的描述，它可以根据不同任务间的关系，设定一个可容忍的“最大夹角”（或最小余弦相似度），并在这个约束下找到一个最优的折衷方向。</li>
+</ul>
+</li>
+<li><strong>优势</strong>：相比PCGrad的“两两调解”，GradVec试图从一个更全局的视角来规划更新路径，理论上可能找到更稳定、更高效的收敛路径。</li>
+</ul>
+<h3 id="2-损失层面：动态平衡任务权重"><a href="#2-损失层面：动态平衡任务权重" class="headerlink" title="2. 损失层面：动态平衡任务权重"></a><strong>2. 损失层面：动态平衡任务权重</strong></h3><p>在多任务学习中，一个最直接的问题就是如何组合不同任务的损失函数。简单地将它们等权重相加（<code>L_total = L_A + L_B</code>）往往效果不佳，因为不同任务的量纲、难度、收敛速度都不同。模型很容易被“简单”或“loss值大”的任务主导，而忽略了其他任务。因此，动态平衡损失权重至关重要。</p>
+<p><strong>2.1 策略一：自适应加权 (Adaptive Weighting, 如DWA)</strong></p>
+<ul>
+<li><strong>核心思想</strong>：像一位“因材施教”的老师，动态地给“学得慢”（即难收敛）的任务分配更多的关注（即更高的loss权重）。</li>
+<li><strong>工作机制</strong>：<ul>
+<li>这种方法会实时追踪每个任务的学习进度，通常用<strong>损失函数值的下降速率</strong>来衡量。</li>
+<li>如果一个任务的loss在最近几轮迭代中下降得很慢，说明模型在这个任务上遇到了瓶颈。此时，算法会自动调高这个任务的loss权重，迫使模型在下一轮更新中投入更多“精力”来优化它。</li>
+<li>它的目标是让所有任务的<strong>学习速度尽可能保持一致</strong>，避免出现部分任务已经过拟合、而另一部分任务还未充分学习的情况。</li>
+</ul>
+</li>
+</ul>
+<p><strong>2.2 策略二：不确定性加权 (Uncertainty Weighting)</strong></p>
+<ul>
+<li><strong>核心思想</strong>：让模型不仅要学习预测任务，还要学习评估自己对这个预测的“不确定性”。一个任务的loss权重，应该和模型对这个任务的确定性成正比。</li>
+<li><strong>工作机制</strong>：<ul>
+<li>该方法为每个任务<code>i</code>引入一个可学习的<strong>不确定性参数<code>σi²</code></strong>。总的损失函数被构造成类似 <code>(1/2σi²) * Li + log(σi)</code> 的形式。</li>
+<li>为了最小化这个总损失，模型有两个选择：一是努力降低任务损失<code>Li</code>；二是“承认自己能力不足”，调高不确定性<code>σi²</code>来降低第一项<code>Li</code>的影响。</li>
+<li><code>log(σi)</code>这一项作为<strong>正则项</strong>，惩罚过大的不确定性，防止模型“躺平”，直接将所有<code>σi²</code>设为无穷大来忽略所有任务。</li>
+<li>最终，模型会达到一个平衡：对于那些模型确实难以把握、噪声较大的任务，它会学习到一个较高的不确定性，从而自动降低该任务的权重。</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-业务目标层面：约束与重构"><a href="#3-业务目标层面：约束与重构" class="headerlink" title="3. 业务目标层面：约束与重构"></a><strong>3. 业务目标层面：约束与重构</strong></h3><p>有时，多任务优化的目标并不仅仅是几个loss的加权和，而是要满足一些复杂的、非线性的业务规则。</p>
+<p><strong>3.1 策略一：约束优化 (Constrained Optimization)</strong></p>
+<ul>
+<li><strong>适用场景</strong>：当业务有<strong>硬性指标（KPI）或约束</strong>时。例如：“在提升CTR的同时，GMV（商品交易总额）<strong>绝不能低于</strong>200万”。</li>
+<li><strong>工作机制</strong>：<ul>
+<li>这将多任务学习问题转化为一个标准的<strong>带约束优化问题</strong>。</li>
+<li>模型的优化过程不再是无约束地寻找loss最低点，而是在一个由业务指标限定的**“可行域”**内寻找最优解。</li>
+<li>这个“可行域”的边界通常由<strong>KKT条件</strong>（一种在非线性规划中找到最优解的必要条件）来定义。在训练的每次迭代中，都需要校验优化结果是否满足这些硬性约束，满足了才是一次有效的更新。</li>
+</ul>
+</li>
+</ul>
+<p><strong>3.2 策略二：重构优化目标 (Reconstructing the Objective)</strong></p>
+<ul>
+<li><strong>适用场景</strong>：当业务逻辑非常复杂，难以用简单的约束来表达时，可以尝试从根源上重新定义模型的学习目标。</li>
+<li><strong>工作机制（以广告回报模型为例）</strong>：<ol>
+<li><strong>定义新指标</strong>：不直接优化CTR或CVR，而是定义一个更贴近商业目标的指标，比如“单次曝光的平均收益”。</li>
+<li><strong>重构标签</strong>：计算出一个全局的“平均曝光收益”基准线。对于每一次广告曝光，如果它的实际收益（综合点击费用、转化服务费等）高于基准线，则其训练标签为正；如果低于基准线，则其标签为<strong>负</strong>。</li>
+<li><strong>带来的好处</strong>：<ul>
+<li><strong>惩罚低效广告</strong>：那些高曝光但低转化、拉低平台整体收益的广告，会因为得到负向的训练信号而逐渐减少曝光机会。</li>
+<li><strong>扶持新广告</strong>：一个全新的、没有历史数据的广告，其初始收益可被认为是0，这比那些收益为负的存量广告要“好”，因此更容易获得冷启动的探索机会。</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+<p>这种方法非常巧妙地将复杂的商业权衡（Exploration &amp; Exploitation、平台长期收益）直接编码到了模型的训练信号中。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>Author: </span><span class="post-copyright-info"><a href="https://qyp9909.github.io">Yuanpeng QU</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>Link: </span><span class="post-copyright-info"><a href="https://qyp9909.github.io/2025/08/10/Rec_AD_MTL/">https://qyp9909.github.io/2025/08/10/Rec_AD_MTL/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>Copyright Notice: </span><span class="post-copyright-info">All articles on this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless otherwise stated.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Study/">Study</a></div><div class="post-share"><div class="social-share" data-image="/images/cover/Rec_AD_Cover.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/08/08/Rec_AD_Ranking/" title="搜广推笔记 排序"><img class="cover" src="/images/cover/Rec_AD_Cover.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">Previous</div><div class="info-item-2">搜广推笔记 排序</div></div><div class="info-2"><div class="info-item-1">搜广推[排序]Created by: Yuanpeng QUCreated time: 2025年8月9日 14:29 推荐系统排序模型知识体系总结（大纲）第一章：排序模型的基础 (Foundations of Ranking Models)在深入探讨各种复杂精妙的模型之前，我们必须先理解所有排序模型所立足的共同基础。这个基础包含两个层面：一是我们如何从业务逻辑上将“排序”这个抽象任务，转化为一个可以用数学模型解决的问题；二是在这个问题的解决方案中，那个最简单、最核心的基石模型——逻辑回归（LR）——是如何工作的。 1.1...</div></div></div></a><a class="pagination-related" href="/2025/08/11/Rec_AD_Metrics/" title="搜广推笔记 指标"><img class="cover" src="/images/cover/Rec_AD_Cover.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">Next</div><div class="info-item-2">搜广推笔记 指标</div></div><div class="info-2"><div class="info-item-1">搜广推[指标]Created by: Yuanpeng QUCreated time: 2025年8月11日 16:14 一、...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>Related Articles</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/08/08/Rec_AD_Ranking/" title="搜广推笔记 排序"><img class="cover" src="/images/cover/Rec_AD_Cover.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-08-08</div><div class="info-item-2">搜广推笔记 排序</div></div><div class="info-2"><div class="info-item-1">搜广推[排序]Created by: Yuanpeng QUCreated time: 2025年8月9日 14:29 推荐系统排序模型知识体系总结（大纲）第一章：排序模型的基础 (Foundations of Ranking Models)在深入探讨各种复杂精妙的模型之前，我们必须先理解所有排序模型所立足的共同基础。这个基础包含两个层面：一是我们如何从业务逻辑上将“排序”这个抽象任务，转化为一个可以用数学模型解决的问题；二是在这个问题的解决方案中，那个最简单、最核心的基石模型——逻辑回归（LR）——是如何工作的。 1.1...</div></div></div></a><a class="pagination-related" href="/2025/08/06/Rec_AD_Recall/" title="搜广推笔记 召回"><img class="cover" src="/images/cover/Rec_AD_Cover.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-08-06</div><div class="info-item-2">搜广推笔记 召回</div></div><div class="info-2"><div class="info-item-1">搜广推[召回]Created by: Yuanpeng QUCreated time: 2025年8月5日 22:51 一、 推荐系统总体架构 (Overall Recommendation System Architecture)1. 级联漏斗范式 (Cascading Funnel Paradigm) 现代大规模推荐系统的核心架构，普遍遵循一种级联漏斗范式 (Cascading Funnel Paradigm)。这个范式的诞生，是为了解决一个根本性的矛盾：一方面，我们的候选物品库是海量的（百万、千万甚至上亿级别）；另一方面，用户的屏幕空间是有限的，且要求响应速度极快（毫秒级）。 因此，我们不可能对所有物品都用最复杂的模型进行最精确的计算。漏斗范式通过设置多个层层递进的过滤环节，实现了从海量到少量，从粗糙到精准的逐级筛选，在计算效率和推荐效果之间取得了极致的平衡。 这个漏斗通常包含以下四个核心层级： 1. 召回层 (Recall...</div></div></div></a><a class="pagination-related" href="/2025/08/11/Rec_AD_Metrics/" title="搜广推笔记 指标"><img class="cover" src="/images/cover/Rec_AD_Cover.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-08-11</div><div class="info-item-2">搜广推笔记 指标</div></div><div class="info-2"><div class="info-item-1">搜广推[指标]Created by: Yuanpeng QUCreated time: 2025年8月11日 16:14 一、...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/LOGO.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Yuanpeng QU</div><div class="author-info-description">CS PhD, 3rd yr.</div><div class="site-data"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">13</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">4</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">5</div></a></div><a id="card-info-btn" href="https://qyp9909.github.io/homepage"><i class="fas fa-user-graduate"></i><span>Academic Homepage</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/qyp9909/qyp9909.github.io" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:qyp9909@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>Announcement</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Contents</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%90%9C%E5%B9%BF%E6%8E%A8-%E5%A4%9A%E7%9B%AE%E6%A0%87%E6%8E%92%E5%BA%8F"><span class="toc-number">1.</span> <span class="toc-text">搜广推[多目标排序]</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%EF%BC%9A%E5%A4%9A%E7%9B%AE%E6%A0%87%E5%AD%A6%E4%B9%A0%E7%9A%84%E6%A0%B8%E5%BF%83%E6%8C%91%E6%88%98%E4%B8%8E%E5%9F%BA%E7%A1%80"><span class="toc-number">2.</span> <span class="toc-text">第一部分：多目标学习的核心挑战与基础</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%8A%A8%E6%9C%BA%EF%BC%9A%E4%B8%BA%E4%BD%95%E9%9C%80%E8%A6%81%E5%A4%9A%E7%9B%AE%E6%A0%87%E5%AD%A6%E4%B9%A0%EF%BC%9F"><span class="toc-number">3.</span> <span class="toc-text">1. 动机：为何需要多目标学习？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E6%A0%B8%E5%BF%83%E7%97%9B%E7%82%B9%E4%B8%80%EF%BC%9A%E6%A0%B7%E6%9C%AC%E9%80%89%E6%8B%A9%E5%81%8F%E5%B7%AE-Sample-Selection-Bias-SSB"><span class="toc-number">4.</span> <span class="toc-text">2. 核心痛点一：样本选择偏差 (Sample Selection Bias, SSB)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E6%A0%B8%E5%BF%83%E7%97%9B%E7%82%B9%E4%BA%8C%EF%BC%9A%E4%BB%BB%E5%8A%A1%E9%97%B4%E5%86%B2%E7%AA%81%E4%B8%8E%E8%B4%9F%E8%BF%81%E7%A7%BB-Negative-Transfer"><span class="toc-number">5.</span> <span class="toc-text">3. 核心痛点二：任务间冲突与负迁移 (Negative Transfer)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E6%A0%B8%E5%BF%83%E7%97%9B%E7%82%B9%E4%B8%89%EF%BC%9A%E7%A8%80%E7%96%8F%E4%BB%BB%E5%8A%A1%E7%9A%84%E2%80%9C%E6%A2%AF%E5%BA%A6%E6%B6%88%E5%A4%B1%E2%80%9D%E9%97%AE%E9%A2%98"><span class="toc-number">6.</span> <span class="toc-text">4. 核心痛点三：稀疏任务的“梯度消失”问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%EF%BC%9A%E7%BB%8F%E5%85%B8%E4%B8%8E%E5%89%8D%E6%B2%BF%E7%9A%84%E5%A4%9A%E7%9B%AE%E6%A0%87%E6%A8%A1%E5%9E%8B%E6%9E%B6%E6%9E%84"><span class="toc-number">7.</span> <span class="toc-text">第二部分：经典与前沿的多目标模型架构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-ESMM-Entire-Space-Multi-task-Model-%EF%BC%9A%E4%B8%93%E9%97%A8%E8%A7%A3%E5%86%B3SSB%E9%97%AE%E9%A2%98"><span class="toc-number">8.</span> <span class="toc-text">1. ESMM (Entire Space Multi-task Model)：专门解决SSB问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-MMoE-Multi-gate-Mixture-of-Experts-%EF%BC%9A%E7%BB%8F%E5%85%B8%E7%9A%84%E4%BB%BB%E5%8A%A1%E9%97%B4%E4%BF%A1%E6%81%AF%E9%80%89%E6%8B%A9%E4%B8%8E%E5%85%B1%E4%BA%AB%E6%A8%A1%E5%9E%8B"><span class="toc-number">9.</span> <span class="toc-text">2. MMoE (Multi-gate Mixture-of-Experts)：经典的任务间信息选择与共享模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-PLE-Progressive-Layered-Extraction-%EF%BC%9AMMoE%E7%9A%84%E8%BF%9B%E9%98%B6%E7%89%88"><span class="toc-number">10.</span> <span class="toc-text">3. PLE (Progressive Layered Extraction)：MMoE的进阶版</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-PEPNet-Parameter-and-Embedding-Personalized-Network-%EF%BC%9A%E5%BF%AB%E6%89%8B%E6%8F%90%E5%87%BA%E7%9A%84%E4%B8%AA%E6%80%A7%E5%8C%96%E5%A4%9A%E4%BB%BB%E5%8A%A1%E5%A4%9A%E5%9F%9F%E6%A8%A1%E5%9E%8B"><span class="toc-number">11.</span> <span class="toc-text">4. PEPNet (Parameter and Embedding Personalized Network)：快手提出的个性化多任务多域模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-STAR-Star-Topology-Adaptive-Recommender-%EF%BC%9A%E9%98%BF%E9%87%8C%E6%8F%90%E5%87%BA%E7%9A%84%E5%A4%9A%E9%A2%86%E5%9F%9FCTR%E6%A8%A1%E5%9E%8B"><span class="toc-number">12.</span> <span class="toc-text">5. STAR (Star Topology Adaptive Recommender)：阿里提出的多领域CTR模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%EF%BC%9A%E5%A4%9A%E4%BB%BB%E5%8A%A1%E7%9A%84%E8%BF%9B%E9%98%B6%E4%BC%98%E5%8C%96%E7%AD%96%E7%95%A5%EF%BC%88%E6%A8%A1%E5%9E%8B%E4%B9%8B%E5%A4%96%EF%BC%89"><span class="toc-number">13.</span> <span class="toc-text">第三部分：多任务的进阶优化策略（模型之外）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A2%AF%E5%BA%A6%E5%B1%82%E9%9D%A2%EF%BC%9A%E7%9B%B4%E6%8E%A5%E5%A4%84%E7%90%86%E6%A2%AF%E5%BA%A6%E5%86%B2%E7%AA%81"><span class="toc-number">14.</span> <span class="toc-text">1. 梯度层面：直接处理梯度冲突</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E6%8D%9F%E5%A4%B1%E5%B1%82%E9%9D%A2%EF%BC%9A%E5%8A%A8%E6%80%81%E5%B9%B3%E8%A1%A1%E4%BB%BB%E5%8A%A1%E6%9D%83%E9%87%8D"><span class="toc-number">15.</span> <span class="toc-text">2. 损失层面：动态平衡任务权重</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E4%B8%9A%E5%8A%A1%E7%9B%AE%E6%A0%87%E5%B1%82%E9%9D%A2%EF%BC%9A%E7%BA%A6%E6%9D%9F%E4%B8%8E%E9%87%8D%E6%9E%84"><span class="toc-number">16.</span> <span class="toc-text">3. 业务目标层面：约束与重构</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Posts</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/08/11/Rec_AD_Metrics/" title="搜广推笔记 指标"><img src="/images/cover/Rec_AD_Cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="搜广推笔记 指标"/></a><div class="content"><a class="title" href="/2025/08/11/Rec_AD_Metrics/" title="搜广推笔记 指标">搜广推笔记 指标</a><time datetime="2025-08-11T06:00:00.000Z" title="Created 2025-08-11 15:00:00">2025-08-11</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/08/10/Rec_AD_MTL/" title="搜广推笔记 多目标排序"><img src="/images/cover/Rec_AD_Cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="搜广推笔记 多目标排序"/></a><div class="content"><a class="title" href="/2025/08/10/Rec_AD_MTL/" title="搜广推笔记 多目标排序">搜广推笔记 多目标排序</a><time datetime="2025-08-10T09:00:00.000Z" title="Created 2025-08-10 18:00:00">2025-08-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/08/08/Rec_AD_Ranking/" title="搜广推笔记 排序"><img src="/images/cover/Rec_AD_Cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="搜广推笔记 排序"/></a><div class="content"><a class="title" href="/2025/08/08/Rec_AD_Ranking/" title="搜广推笔记 排序">搜广推笔记 排序</a><time datetime="2025-08-08T09:00:00.000Z" title="Created 2025-08-08 18:00:00">2025-08-08</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/08/06/Rec_AD_Recall/" title="搜广推笔记 召回"><img src="/images/cover/Rec_AD_Cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="搜广推笔记 召回"/></a><div class="content"><a class="title" href="/2025/08/06/Rec_AD_Recall/" title="搜广推笔记 召回">搜广推笔记 召回</a><time datetime="2025-08-06T09:00:00.000Z" title="Created 2025-08-06 18:00:00">2025-08-06</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/06/09/my-first-blog/" title="我最喜欢的十部电影推荐"><img src="/images/posts/movie-banner.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="我最喜欢的十部电影推荐"/></a><div class="content"><a class="title" href="/2025/06/09/my-first-blog/" title="我最喜欢的十部电影推荐">我最喜欢的十部电影推荐</a><time datetime="2025-06-09T08:00:00.000Z" title="Created 2025-06-09 17:00:00">2025-06-09</time></div></div></div></div></div></div></main><footer id="footer" style="background: transparent;"><div id="footer-wrap"><div class="copyright">&copy;2021 - 2025 By Yuanpeng QU</div><div class="footer_custom_text">Welcome to Kyoku's <a href="https://qyp9909.github.io/">blog</a>! All right reserved.</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Reading Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Toggle Between Light and Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle Between Single-column and Double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="Settings"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back to Top"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="255,255,255" opacity="0.8" zIndex="-1" count="200" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
