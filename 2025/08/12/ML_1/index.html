@@ -1,0 +1,952 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>机器学习小记 | Kyoku's Blog</title><meta name="author" content="Yuanpeng QU"><meta name="copyright" content="Yuanpeng QU"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="机器学习小记Created by: Yuanpeng QUCreated time: 2025年8月13日 10:43 第一部分：神经网络的核心组件 (Core Components of Neural Networks)1.1 激活函数：从经典到现代激活函数是神经网络的灵魂，它负责向网络中引入非线性，使得网络有能力学习和拟合现实世界中复杂的非线性关系。如果没有激活函数，多层神经网络本质上等同于一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="机器学习小记">
+<meta property="og:url" content="https://qyp9909.github.io/2025/08/12/ML_1/index.html">
+<meta property="og:site_name" content="Kyoku&#39;s Blog">
+<meta property="og:description" content="机器学习小记Created by: Yuanpeng QUCreated time: 2025年8月13日 10:43 第一部分：神经网络的核心组件 (Core Components of Neural Networks)1.1 激活函数：从经典到现代激活函数是神经网络的灵魂，它负责向网络中引入非线性，使得网络有能力学习和拟合现实世界中复杂的非线性关系。如果没有激活函数，多层神经网络本质上等同于一">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://qyp9909.github.io/images/cover/Rec_AD_Cover.png">
+<meta property="article:published_time" content="2025-08-12T09:00:00.000Z">
+<meta property="article:modified_time" content="2025-08-13T05:23:07.876Z">
+<meta property="article:author" content="Yuanpeng QU">
+<meta property="article:tag" content="Study">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://qyp9909.github.io/images/cover/Rec_AD_Cover.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "机器学习小记",
+  "url": "https://qyp9909.github.io/2025/08/12/ML_1/",
+  "image": "https://qyp9909.github.io/images/cover/Rec_AD_Cover.png",
+  "datePublished": "2025-08-12T09:00:00.000Z",
+  "dateModified": "2025-08-13T05:23:07.876Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Yuanpeng QU",
+      "url": "https://qyp9909.github.io/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://qyp9909.github.io/2025/08/12/ML_1/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'undefined')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: 'Copy Successful',
+    error: 'Copy Failed',
+    noSupport: 'Browser Not Supported'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: 'days',
+  dateSuffix: {
+    just: 'Just now',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: {"chs_to_cht":"You have switched to Traditional Chinese","cht_to_chs":"You have switched to Simplified Chinese","day_to_night":"You have switched to Dark Mode","night_to_day":"You have switched to Light Mode","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"bottom-left"},
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: 'Load More'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '机器学习小记',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" media="defer" onload="this.media='all'"><link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet"><link rel="stylesheet" href="/css/custom.css"  media="defer" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/HCLonely/images@master/others/heartbeat.min.css"><link rel="preload" as="image" href="/img/1.jpg"><link rel="preload" href="/fonts/circle400w.ttf" as="font" type="font/ttf" crossorigin="anonymous"><meta name="generator" content="Hexo 7.3.0"></head><body><script>window.paceOptions = {
+  restartOnPushState: false
+}
+
+btf.addGlobalFn('pjaxSend', () => {
+  Pace.restart()
+}, 'pace_restart')
+
+</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js/themes/blue/pace-theme-minimal.min.css"/><script src="https://cdn.jsdelivr.net/npm/pace-js/pace.min.js"></script><div id="web_bg" style="background-image: url(/img/1.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/LOGO.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">15</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">4</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">5</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-vihara"></i><span> Home</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-newspaper"></i><span> Articles</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-mug-hot"></i><span> Life</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/gallery/"><i class="fa-fw fas fa-camera-retro"></i><span> Gallery</span></a></li><li><a class="site-page child" href="/music/"><i class="fa-fw fab fa-itunes-note"></i><span> Music</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fab fa-youtube"></i><span> Movie</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-torii-gate"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-star-of-david"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">Kyoku's Blog</span></a><a class="nav-page-title" href="/"><span class="site-name">机器学习小记</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-vihara"></i><span> Home</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-newspaper"></i><span> Articles</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-mug-hot"></i><span> Life</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/gallery/"><i class="fa-fw fas fa-camera-retro"></i><span> Gallery</span></a></li><li><a class="site-page child" href="/music/"><i class="fa-fw fab fa-itunes-note"></i><span> Music</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fab fa-youtube"></i><span> Movie</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-torii-gate"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-star-of-david"></i><span> About</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">机器学习小记</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2025-08-12T09:00:00.000Z" title="Created 2025-08-12 18:00:00">2025-08-12</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2025-08-13T05:23:07.876Z" title="Updated 2025-08-13 14:23:07">2025-08-13</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Recsys/">Recsys</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post Views:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h2 id="机器学习小记"><a href="#机器学习小记" class="headerlink" title="机器学习小记"></a>机器学习小记</h2><p>Created by: Yuanpeng QU<br>Created time: 2025年8月13日 10:43</p>
+<h2 id="第一部分：神经网络的核心组件-Core-Components-of-Neural-Networks"><a href="#第一部分：神经网络的核心组件-Core-Components-of-Neural-Networks" class="headerlink" title="第一部分：神经网络的核心组件 (Core Components of Neural Networks)"></a><strong>第一部分：神经网络的核心组件 (Core Components of Neural Networks)</strong></h2><h3 id="1-1-激活函数：从经典到现代"><a href="#1-1-激活函数：从经典到现代" class="headerlink" title="1.1 激活函数：从经典到现代"></a><strong>1.1 激活函数：从经典到现代</strong></h3><p>激活函数是神经网络的灵魂，它负责向网络中引入<strong>非线性</strong>，使得网络有能力学习和拟合现实世界中复杂的非线性关系。如果没有激活函数，多层神经网络本质上等同于一个单层的线性模型。</p>
+<p><strong>1.1.1 Sigmoid &amp; Tanh：经典饱和函数的特性与局限性</strong></p>
+<p><strong>1. Sigmoid 函数</strong></p>
+<ul>
+<li><p><strong>公式：</strong></p>
+<p>  $$<br>  f(x) &#x3D; \frac{1}{1+e^{-x}}<br>  $$</p>
+</li>
+<li><p><strong>核心特性：</strong></p>
+<ul>
+<li>将任意实数输入压缩到 <code>(0, 1)</code> 区间内。</li>
+<li>这个特性使其输出可以被直观地解释为<strong>概率</strong>，因此在逻辑回归以及各类分类模型的<strong>输出层</strong>中，当需要预测一个概率时，Sigmoid 仍然是标准选择。特别是在<strong>CTR&#x2F;CVR预估</strong>中，它的地位不可动摇。</li>
+</ul>
+</li>
+<li><p><strong>主要局限性 (面试重点):</strong></p>
+<ol>
+<li><strong>梯度消失 (Vanishing Gradient):</strong> 这是 Sigmoid 最致命的弱点。当输入值的绝对值很大时（例如 <code>x &gt; 5</code> 或 <code>x &lt; -5</code>），Sigmoid 函数的曲线非常平坦，其导数（梯度）趋近于0。在深度网络中，根据链式法则，梯度在反向传播时会逐层相乘。多个接近0的小数相乘，会导致传到浅层网络的梯度变得无限小，使得浅层网络的参数几乎无法更新，模型也就学不动了。</li>
+<li><strong>输出非零中心 (Non-Zero-Centered):</strong> Sigmoid 的输出恒为正数。这会导致后一层神经元的输入全是正的，在反向传播计算梯度时，会导致对权重的梯度方向要么全为正，要么全为负。这种更新方式效率低下，收敛过程会呈现“Z”字形，拖慢训练速度。</li>
+</ol>
+</li>
+</ul>
+<p><strong>2. Tanh (双曲正切) 函数</strong></p>
+<ul>
+<li><p><strong>公式：</strong></p>
+<p>  $$<br>  \tanh(x) &#x3D; \frac{e^x - e^{-x}}{e^x + e^{-x}}<br>  $$</p>
+</li>
+<li><p><strong>核心特性：</strong></p>
+<ul>
+<li>可以看作是“加强版”的 Sigmoid，它将输入压缩到 <code>(-1, 1)</code> 区间。</li>
+<li><strong>优点：</strong> 它的输出是<strong>零中心</strong>的，解决了 Sigmoid 的非零中心问题，因此在实践中通常比 Sigmoid 收敛更快。</li>
+<li><strong>局限性：</strong> 它依然是一个饱和函数，在输入值绝对值很大时，两端同样非常平坦，所以<strong>仍然存在梯度消失</strong>的问题，只是相比 Sigmoid 有所缓解。</li>
+</ul>
+</li>
+</ul>
+<p><strong>总结：</strong> 由于梯度消失的致命缺陷，Sigmoid 和 Tanh 目前已<strong>很少被用于深度神经网络的隐藏层</strong>，它们的位置被下面要讲的 ReLU 所取代。</p>
+<hr>
+<p><strong>1.1.2 ReLU：现代网络的默认选择、优点与“死亡”问题</strong></p>
+<p><strong>ReLU (Rectified Linear Unit, 修正线性单元)</strong> 是深度学习领域最重要的突破之一，它极大地促进了深度网络的成功训练。</p>
+<ul>
+<li><p><strong>公式：</strong></p>
+<p>  $$<br>  f(x) &#x3D; \max(0, x)<br>  $$</p>
+</li>
+<li><p><strong>核心特性与优点 (面试重点):</strong></p>
+<ol>
+<li><strong>有效解决梯度消失：</strong> 在输入为正数时 (<code>x &gt; 0</code>)，ReLU 的导数恒为1。这意味着梯度在反向传播过程中可以完整地通过激活函数，不会像 Sigmoid&#x2F;Tanh 那样逐层衰减。这是它能够支持训练非常深的网络的最主要原因。</li>
+<li><strong>计算效率极高：</strong> 实现上只是一个简单的取最大值操作，相比 Sigmoid&#x2F;Tanh 的指数运算，计算成本极低，无论在前向传播还是反向传播中都非常快。</li>
+<li><strong>引入稀疏性：</strong> 当输入为负数时，ReLU 的输出为0。这会使得网络中的一部分神经元“关闭”，形成稀疏的激活状态。这种稀疏性一方面降低了计算量，另一方面也被认为有助于降低过拟合。</li>
+</ol>
+</li>
+<li><p><strong>主要局限性：</strong></p>
+<ol>
+<li><strong>“死亡 ReLU” 问题 (Dying ReLU):</strong> 这是 ReLU 最著名的缺点。在训练过程中，如果一个神经元接收到的输入，由于某次不恰当的权重更新（比如学习率过大），导致其之后对于整个训练集的所有输入都恒为负数，那么这个神经元的输出将永远是0。由于 <code>x&lt;0</code> 时 ReLU 的梯度也为0，这个神经元的权重将永远无法再得到更新。它就像一个“坏死”的神经元，不再对任何输入有响应，在网络中失去了作用。</li>
+<li><strong>输出非零中心：</strong> 和 Sigmoid 一样，ReLU 的输出也非零中心（恒大于等于0），这会带来一些优化上的低效，但相比其解决梯度消失的巨大优点，这个问题通常被认为是次要的。</li>
+</ol>
+</li>
+</ul>
+<p><strong>1.1.3 Swish &amp; GELU：更平滑、更先进的激活函数探索</strong></p>
+<p>在 ReLU 成为主流之后，研究者们并未停止探索的脚步。他们希望找到一种激活函数，既能拥有 ReLU 解决梯度消失的优点，又能克服其“硬拐点”（在0处不可导）和“死亡”等问题。Swish 和 GELU 就是其中的佼佼者。</p>
+<p><strong>1. Swish 函数</strong></p>
+<ul>
+<li><strong>公式：</strong> <code>f(x)=x⋅σ(x)</code>，其中 σ(x) 是 Sigmoid 函数。</li>
+<li><strong>核心思想：自门控 (Self-gating)。</strong> 函数的输出是输入 <code>x</code> 本身与一个由 <code>x</code> 生成的“门” <code>σ(x)</code> 的乘积。这个门的取值在 <code>(0, 1)</code> 之间，可以被看作是一个软性的、连续的开关，决定了原始输入 <code>x</code> 有多大比例可以通过。</li>
+<li><strong>特性与优点：</strong><ul>
+<li><strong>平滑连续：</strong> Swish 在所有点上都是可导的，解决了 ReLU 在0点的硬拐点问题，这通常有利于优化过程。</li>
+<li><strong>非单调性：</strong> 在负值区域，Swish 的函数图像会先轻微下降再上升。这种非单调的特性被认为增加了模型的表达能力，使其能拟合更复杂的关系。</li>
+<li><strong>经验性成功：</strong> Swish 最初是由 Google 通过自动化架构搜索发现的，在许多深度模型上的实验表明，它的性能通常略优于 ReLU。</li>
+</ul>
+</li>
+</ul>
+<p><strong>2. GELU (Gaussian Error Linear Unit) 函数</strong></p>
+<ul>
+<li><strong>公式：</strong> <code>f(x)=x⋅Φ(x)</code>，其中 <code>Φ(x)</code> 是标准正态分布的累积分布函数 (CDF)。</li>
+<li><strong>核心思想：概率化的 ReLU。</strong> GELU 的设计思想更具理论性。它可以被理解为对输入 <code>x</code> 进行的一种随机正则化。<code>Φ(x)</code> 代表了“从标准正态分布中采样的值小于x”的概率。因此，GELU 的输出可以看作是输入 <code>x</code> 在其可能被“激活”（即其值在统计上足够显著）的概率下的期望值。</li>
+<li><strong>特性与应用 (面试重点)：</strong><ul>
+<li><strong>理论驱动：</strong> 其设计与 Dropout 和 Zoneout 等正则化方法有深刻的理论联系。</li>
+<li><strong>性能卓越：</strong> GELU 是 <strong>Transformer 架构（如 BERT, GPT）中前馈网络层（FFN）的标准激活函数</strong>。提到这一点可以充分展现你对前沿模型的了解。</li>
+</ul>
+</li>
+</ul>
+<p><strong>Swish 与 GELU 的关系：</strong><br>它们的函数形状和性能表现都非常相似。在实践中，<strong>Swish 可以被看作是 GELU 的一个非常有效且形式更简洁的近似</strong>。它们的核心区别在于设计思想：<code>GELU 源于概率理论，而 Swish 源于实验搜索</code>。</p>
+<hr>
+<p><strong>1.1.4 GLU (门控线性单元)：一种智能的信息流控制机制</strong></p>
+<p>GLU 不是一个简单的、作用于单个神经元的激活函数，而是一种更复杂的、控制信息流的<strong>网络结构单元</strong>。</p>
+<ul>
+<li><strong>公式：</strong> <code>GLU(x,v)=x⊙σ(v)</code>，其中 <code>⊙</code> 代表逐元素相乘。</li>
+<li><strong>工作机制：</strong><ol>
+<li><strong>输入分裂：</strong> 将上一层的输出 Tensor 在特征维度上分成两半，得到 <code>x</code> 和 <code>v</code>。</li>
+<li><strong>信息流 (<code>x</code>)：</strong> 作为主要的待处理信息。</li>
+<li><strong>控制门 (<code>v</code>)：</strong> 作为“阀门”的控制信号。它会经过一个 Sigmoid 函数 <code>σ(v)</code>，生成一个值在 <code>(0, 1)</code> 之间的门控向量。</li>
+<li><strong>信息过滤：</strong> 将信息流 <code>x</code> 与其对应的门控向量 <code>σ(v)</code> 进行逐元素相乘。这样，门控向量中的每个值就决定了信息流 <code>x</code> 中对应维度的信息有多大比例可以通过。如果门控值为0，则信息被完全阻断；如果为1，则信息无损通过。</li>
+</ol>
+</li>
+<li><strong>核心价值：</strong> GLU 赋予了网络一种<strong>动态的、依赖于数据自身来控制信息流</strong>的能力。这比静态的、一成不变的激活（如ReLU）要灵活得多。</li>
+<li><strong>应用与联系：</strong><ul>
+<li>这个“门控”思想是 <strong>LSTM 和 GRU</strong> 等循环神经网络的核心。</li>
+<li><strong>Swish</strong> 函数 <code>x * σ(x)</code> 可以被视为 GLU 的一种特例，其中信息流和控制门都来自同一个输入 <code>x</code>。</li>
+<li>在现代的 <strong>Transformer</strong> 模型中，使用 GLU 的变体（如 <strong>SwiGLU</strong>, <strong>GeGLU</strong>）来构建前馈网络层，已经成为提升模型性能的有效手段。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>1.1.5 基础辨析：为什么不用 sin&#x2F;cos 作为激活函数？</strong></p>
+<p>这是一个很好的“第一性原理”问题，考察你对激活函数根本作用的理解。在标准的分类、回归等任务中，sin&#x2F;cos 不被用作激活函数，主要有以下三个原因：</p>
+<ol>
+<li><strong>周期性导致的“多对一”歧义：</strong><br>这是最根本的问题。由于 <code>sin(x) = sin(x + 2π)</code>，多个不同的输入会映射到完全相同的输出。这给模型的学习带来了巨大的歧义。在反向传播时，如果输出层出现某个误差，模型将无法判断这个误差是由哪个输入周期引起的，导致梯度更新方向不明确，模型难以收敛。</li>
+<li><strong>不稳定的周期性梯度：</strong><code>sin(x)</code> 的导数是 <code>cos(x)</code>，其值在 <code>[-1, 1]</code> 之间周期性地来回震荡，并且会周期性地取到0。对于深度网络，我们希望梯度能够稳定地、一致地传播。一个来回变换正负、大小不一且会周期性消失的梯度，会使得网络的训练过程非常不稳定，权重更新摇摆不定，难以走向最优。</li>
+<li><strong>缺乏理想的函数特性：</strong><br>主流的激活函数通常具备一些理想的特性来帮助学习。例如，ReLU 提供了单侧抑制和稀疏性，并且其激活值没有上限；Sigmoid 提供了 <code>(0, 1)</code> 的平滑门控。而 <code>sin/cos</code> 的输出被严格限制在 <code>[-1, 1]</code>，并且其非单调的波动特性，对于深度网络逐层提取和抽象特征这一通用目标来说，通常不具备优势。</li>
+</ol>
+<h3 id="1-2-权重初始化：让训练稳定起步"><a href="#1-2-权重初始化：让训练稳定起步" class="headerlink" title="1.2 权重初始化：让训练稳定起步"></a><strong>1.2 权重初始化：让训练稳定起步</strong></h3><p>在开始训练神经网络之前，我们需要为模型的权重（Weight）和偏置（Bias）赋一个初始值。这个看似简单的步骤，却对整个训练过程的成败至关重要。一个好的初始化方案能让训练事半功倍，而一个糟糕的初始化则可能让网络从一开始就无法学习。</p>
+<p><strong>为什么权重初始化如此重要？<strong>如果初始化不当，主要会导致</strong>梯度消失</strong>或<strong>梯度爆炸</strong>问题。</p>
+<ul>
+<li><strong>初始化太小（比如都接近0）：</strong><br>输入信号 <code>x</code> 在逐层前向传播时，每经过一层，其方差（可以理解为信号的“能量”）都会缩小。传到深层时，信号可能已经变得非常微弱。在反向传播时，梯度也会逐层衰减，最终导致<strong>梯度消失</strong>。</li>
+<li><strong>初始化太大：</strong><br>信号在逐层传播时，其方差会不断被放大。传到深层时，激活值可能变得极大。这会导致两个问题：<ol>
+<li>对于 Sigmoid&#x2F;Tanh 等饱和激活函数，巨大的输入值会使其落入“饱和区”，导致梯度为0，从而引发<strong>梯度消失</strong>。</li>
+<li>在反向传播时，梯度也可能被逐层放大，最终变得极其巨大，引发<strong>梯度爆炸</strong>，这会导致参数更新过猛，使训练过程完全发散。</li>
+</ol>
+</li>
+</ul>
+<p><strong>核心原则：</strong><br>一个好的初始化方法，其核心目标是<strong>让网络各层的激活值和梯度的方差在传播过程中都能保持稳定</strong>，既不放大也不缩小。</p>
+<hr>
+<p><strong>1.2.1 Xavier 与 He 初始化：激活函数的“最佳拍档”</strong></p>
+<p>Xavier 和 He 是目前最主流的两种初始化方法，它们的选择与你所使用的<strong>激活函数</strong>紧密相关。</p>
+<p><strong>1. Xavier 初始化 (又名 Glorot 初始化)</strong></p>
+<ul>
+<li><strong>设计目标&#x2F;适用场景：</strong><br>专为<strong>对称的、以零为中心</strong>的激活函数设计，最典型的就是 <strong>Tanh</strong> 和 <strong>Sigmoid</strong>（在输入标准化后）。</li>
+<li><strong>核心思想：</strong><br>Xavier 的推导基于一个前提：激活函数在线性区工作，且输入和输出的均值为0。它试图让每一层输出的方差等于输入的方差，同时让反向传播的梯度方差也保持不变。</li>
+<li><strong>公式（思想）：</strong><br>它会根据一层的<strong>输入神经元数量 <code>fan_in</code></strong> 和<strong>输出神经元数量 <code>fan_out</code></strong> 来决定权重的初始方差。一个常见的实现是从一个均值为0，方差为 Var(W)&#x3D;fanin+fanout2 的分布中进行采样。<ul>
+<li><strong>直观理解：</strong> 输入连接 <code>fan_in</code> 越多，输出的方差越容易被放大。为了抵消这种影响，权重的方差就需要相应地调小，所以 <code>fan_in</code> 和 <code>fan_out</code> 会出现在分母上。</li>
+</ul>
+</li>
+<li><strong>不适用于 ReLU 的原因：</strong><br>ReLU 函数会将所有负数输入都置为0，这破坏了 Xavier 所需的“零中心”假设。更重要的是，这个操作会使得输出的方差大约变为输入方差的<strong>一半</strong>。因此，如果将 Xavier 初始化用于 ReLU 网络，信号的方差依然会逐层递减，当网络很深时，最终还是会导致梯度消失。</li>
+</ul>
+<p><strong>2. He 初始化 (又名 Kaiming 初始化)</strong></p>
+<ul>
+<li><strong>设计目标&#x2F;适用场景：</strong><br>专为 <strong>ReLU 及其变种（Leaky ReLU, PReLU 等）</strong> 量身打造。这是目前<strong>深度学习模型的标准选择</strong>。</li>
+<li><strong>核心思想：</strong><br>He 初始化精准地解决了 Xavier 初始化在 ReLU 网络中的问题。它考虑到了 ReLU 会使方差减半这一特性。</li>
+<li><strong>公式（思想）：</strong><br>它的实现是从一个均值为0，方差为 Var(W)&#x3D;fanin2 的分布中进行采样。<ul>
+<li><strong>关键洞察：</strong> 与 Xavier 的一个常用变种（方差为 <code>1/fan_in</code>）相比，He 初始化的方差正好是其<strong>两倍</strong>。这个“乘以2”的操作，就是为了<strong>补偿</strong> ReLU 激活函数带来的方差减半的损失，从而保证了信号方差在网络中能够保持稳定。</li>
+</ul>
+</li>
+</ul>
+<p><strong>总结：</strong></p>
+<table>
+<thead>
+<tr>
+<th>初始化方法</th>
+<th>最佳搭配激活函数</th>
+<th>核心思想</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Xavier 初始化</strong></td>
+<td>Tanh, Sigmoid</td>
+<td>保持输入输出方差一致，适用于对称激活函数</td>
+</tr>
+<tr>
+<td><strong>He 初始化</strong></td>
+<td><strong>ReLU</strong> 及其变种</td>
+<td><strong>补偿</strong>因ReLU导致的方差损失，适用于非对称的ReLU类函数</td>
+</tr>
+</tbody></table>
+<h2 id="第二部分：模型的“导航系统”：损失函数-The-Model’s-“Navigation-System”-Loss-Functions"><a href="#第二部分：模型的“导航系统”：损失函数-The-Model’s-“Navigation-System”-Loss-Functions" class="headerlink" title="第二部分：模型的“导航系统”：损失函数 (The Model’s “Navigation System”: Loss Functions)"></a><strong>第二部分：模型的“导航系统”：损失函数 (The Model’s “Navigation System”: Loss Functions)</strong></h2><p>损失函数（Loss Function）的核心作用是<strong>衡量模型预测结果与真实标签之间的差距</strong>。模型训练的过程，本质上就是通过优化算法（如梯度下降）来不断调整参数，以最小化这个“差距”（即损失函数的值）。</p>
+<h3 id="2-1-分类问题的基石：交叉熵-Cross-Entropy"><a href="#2-1-分类问题的基石：交叉熵-Cross-Entropy" class="headerlink" title="2.1 分类问题的基石：交叉熵 (Cross-Entropy)"></a><strong>2.1 分类问题的基石：交叉熵 (Cross-Entropy)</strong></h3><p>在所有分类任务中，无论是二分类还是多分类，交叉熵都是当之无愧的“标准”损失函数。要深刻理解交叉熵，我们必须先从它的“理论源头”——KL散度开始。</p>
+<p><strong>2.1.1 KL 散度与交叉熵的深刻联系</strong></p>
+<p><strong>1. KL 散度 (Kullback-Leibler Divergence)：衡量分布的“距离”</strong></p>
+<ul>
+<li><strong>核心思想：</strong><br>KL散度源于信息论，它用于衡量两个概率分布之间的<strong>差异性</strong>或**“距离”**。这里的“距离”不是几何距离，而是信息论意义上的距离。<br>假设我们有两个分布：<ul>
+<li><code>P</code>：真实世界的数据分布（<strong>真相</strong>）。</li>
+<li><code>Q</code>：我们模型预测出的概率分布（<strong>模型的认知</strong>）。<br>  KL散度 DKL(P∣∣Q) 度量了当我们用“模型的认知Q”来描述“真相P”时，相比于用“真相P”本身来描述，会额外产生多少信息损失或“意外”。</li>
+</ul>
+</li>
+<li><strong>目标：</strong><br>在机器学习中，我们的目标就是让我们模型的认知 <code>Q</code> 无限地逼近真相 <code>P</code>，也就是最小化 DKL(P∣∣Q)。当两个分布完全相同时，KL散度为0。</li>
+<li><strong>关键特性：</strong> KL散度是非对称的，即 <code>D_KL(P||Q)!=D_KL(Q||P)</code>。我们始终使用前者，因为它惩罚的是“模型未能预测出真实情况”，这正是我们想要的。</li>
+</ul>
+<p><strong>2. 交叉熵 (Cross-Entropy)：KL散度的“实用替身”</strong></p>
+<p>既然我们的目标是最小化KL散度，为什么在实践中几乎所有的代码里写的都是交叉熵损失呢？答案就藏在下面这个关键的恒等式中：</p>
+<p>$$<br>H(P,Q) &#x3D; H(P) + D_{KL}(P||Q)<br>$$</p>
+<ul>
+<li><strong>公式解读：</strong><ul>
+<li>H(P,Q)：分布 <code>P</code> 和 <code>Q</code> 的<strong>交叉熵</strong>。</li>
+<li>H(P)：真实分布 <code>P</code> 的<strong>信息熵</strong>。它代表了真实数据本身所固有的不确定性或信息量。对于一个给定的、不变的数据集来说，<code>H(P)</code> 是一个<strong>固定的常数</strong>。</li>
+<li>DKL(P∣∣Q)：<code>P</code> 和 <code>Q</code> 之间的 <strong>KL散度</strong>。</li>
+</ul>
+</li>
+<li><strong>“Aha!”时刻：</strong><br>我们的优化目标是<strong>最小化 DKL(P∣∣Q)</strong>。观察上面的公式，由于 H(P) 是一个无法被模型改变的常数，那么<strong>最小化等式右边的 DKL(P∣∣Q)，就完全等价于最小化等式左边的交叉熵 H(P,Q)！</strong></li>
+<li><strong>为什么选择交叉熵？</strong><br>因为交叉熵的计算<strong>更简单、更方便</strong>。<ul>
+<li><p>KL散度的公式为：计算时需要用到 logP(x)。</p>
+<p>  $$<br>  D_{KL}(P||Q) &#x3D; \sum P(x) \log \frac{P(x)}{Q(x)}<br>  $$</p>
+</li>
+<li><p>交叉熵的公式为：</p>
+<p>  $$<br>  H(P,Q) &#x3D; -\sum P(x) \log Q(x)<br>  $$</p>
+<p>  交叉熵的计算只需要真实标签（<code>P(x)</code>，在分类中通常是0或1）和模型的预测概率（<code>Q(x)</code>），完全避开了对 logP(x) 的计算，在编程实现上更加直接。</p>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>总结：</strong></p>
+<p>“KL散度和交叉熵是衡量两个概率分布差异的两个高度相关的指标。KL散度是理论上的差异度量，也是我们模型优化的根本目标。而交叉熵可以被分解为‘真实数据的信息熵’与‘KL散度’之和。</p>
+<p>在机器学习任务中，由于真实数据的信息熵是一个固定的常数，因此<strong>最小化交叉熵就等价于最小化KL散度</strong>。我们之所以在实践中都使用交叉熵作为损失函数，是因为它的计算形式比KL散度更简洁，不涉及对真实分布取对数，从而在实现上更方便，但达成的优化目标是完全一致的：即使模型的预测分布 <code>Q</code> 尽可能地接近真实的数据分布 <code>P</code>。”</p>
+<hr>
+<p><strong>2.1.2 二元交叉熵 (BCE) vs. 多元交叉熵 (CE)</strong></p>
+<p>虽然都叫交叉熵，但这两个术语是交叉熵原理在两种不同分类场景下的具体应用。其根本区别在于<strong>问题的性质</strong>和<strong>模型的输出层设计</strong>。</p>
+<p><strong>1. 二元交叉熵 (Binary Cross-Entropy, BCE)</strong></p>
+<ul>
+<li><p><strong>应用场景：二分类问题 (Binary Classification)</strong></p>
+<ul>
+<li>任务是“是&#x2F;否”的判断，类别之间是“二选一”。</li>
+<li><strong>“搜广推”典型应用：</strong> 点击率(CTR)预估（点击&#x2F;不点击）、转化率(CVR)预估（转化&#x2F;不转化）、垃圾邮件检测（是&#x2F;否）等。</li>
+</ul>
+</li>
+<li><p><strong>模型输出层设计：</strong></p>
+<ul>
+<li>最后一层网络通常只有 <strong>1个输出神经元</strong>。</li>
+<li>激活函数使用 <strong>Sigmoid</strong>，将输出值 <code>z</code> 映射为一个 <code>(0, 1)</code> 之间的概率 <code>p</code>，这个 <code>p</code> 代表了样本属于正类（类别为1）的概率。负类的概率则隐含为 <code>1-p</code>。</li>
+</ul>
+</li>
+<li><p><strong>损失函数公式：</strong></p>
+<p>  $$<br>  L_{BCE} &#x3D; -[y \log(p) + (1 - y) \log(1 - p)]<br>  $$</p>
+<ul>
+<li><code>y</code> 是真实标签（取值为0或1）。</li>
+<li><code>p</code> 是模型预测为正类的概率。</li>
+<li><strong>工作原理：</strong> 当真实标签 <code>y=1</code> 时，损失为 <code>log(p)</code>，为了最小化损失，模型必须让 <code>p</code> 趋近于1。当 <code>y=0</code> 时，损失为 <code>log(1-p)</code>，模型必须让 <code>p</code> 趋近于0。这个公式巧妙地将两种情况统一了起来。</li>
+</ul>
+</li>
+</ul>
+<p><strong>2. 多元交叉熵 (Categorical Cross-Entropy, CE)</strong></p>
+<ul>
+<li><p><strong>应用场景：多分类问题 (Multi-class Classification)</strong></p>
+<ul>
+<li>任务是“N选一”，类别之间是<strong>互斥</strong>的。</li>
+<li><strong>“搜广推”典型应用：</strong> 预测一个商品属于哪个品类（电子&#x2F;图书&#x2F;服装&#x2F;…），预测用户年龄分段，识别图片中的物体属于哪个类别。</li>
+</ul>
+</li>
+<li><p><strong>模型输出层设计：</strong></p>
+<ul>
+<li>最后一层网络有 <strong>K个输出神经元</strong>（K为类别总数）。</li>
+<li>激活函数使用 <strong>Softmax</strong>，它将K个神经元的输出 <code>z_1, ..., z_K</code> 转化为一个K维的概率向量，向量中每个元素代表样本属于该类的概率，且所有元素之和为1。</li>
+</ul>
+</li>
+<li><p><strong>损失函数公式：</strong></p>
+<p>  $$<br>  L_{CE} &#x3D; -\sum_{k&#x3D;1}^{K} y_k \log(p_k)<br>  $$</p>
+<ul>
+<li><code>y</code> 是 one-hot 编码的真实标签向量（如 <code>[0, 1, 0]</code> 表示真实类别是第2类）。<code>y_k</code> 是该向量的第k个元素。</li>
+<li><code>p_k</code> 是模型预测样本属于第k类的概率。</li>
+<li><strong>工作原理：</strong> 由于 <code>y</code> 是 one-hot 向量，只有一个 <code>y_k</code> 为1，其余都为0。因此，上面的求和公式会简化为：LCE&#x3D;−log(pc)，其中 <code>p_c</code> 是模型对<strong>那个唯一的正确类别</strong>所预测的概率。其目标就是最大化模型对正确答案预测的置信度。</li>
+</ul>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th><strong>二元交叉熵 (BCE)</strong></th>
+<th><strong>多元交叉熵 (CE)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>任务场景</strong></td>
+<td>二分类 (Yes&#x2F;No)</td>
+<td>多分类 (Choose one from N)</td>
+</tr>
+<tr>
+<td><strong>输出层激活</strong></td>
+<td>Sigmoid</td>
+<td>Softmax</td>
+</tr>
+<tr>
+<td><strong>输出维度</strong></td>
+<td>1个概率值 <code>p</code></td>
+<td>K个概率值 (和为1)</td>
+</tr>
+<tr>
+<td><strong>标签形式</strong></td>
+<td>标量 (0或1)</td>
+<td>One-hot 向量</td>
+</tr>
+<tr>
+<td><strong>本质</strong></td>
+<td>交叉熵在<strong>伯努利分布</strong>下的特例</td>
+<td>交叉熵在**类别分布(多项分布)**下的应用</td>
+</tr>
+</tbody></table>
+<hr>
+<p><strong>2.1.3 核心辨析：为什么分类任务用交叉熵，而不是均方误差(MSE)？</strong></p>
+<p>这是一个在面试中极高频出现的问题，能清晰回答代表你对模型训练的原理有深刻理解。MSE 在回归任务中是王者，但用于分类任务则水土不服，主要有两大原因：</p>
+<p><strong>1. 梯度优化问题：MSE 在分类任务中会“偷懒”</strong></p>
+<ul>
+<li><strong>MSE的梯度陷阱：</strong><br>在分类任务中，我们通常用 Sigmoid&#x2F;Softmax 将输出映射为概率。以 Sigmoid 为例，其函数曲线在两端（输出接近0或1）非常平坦，这意味着它的<strong>导数在这些区域非常小</strong>。<br>MSE 损失的梯度，根据链式法则，正比于 <code>(预测值 - 真实值) * Sigmoid的导数</code>。<br><strong>问题来了：</strong> 当模型犯下弥天大错时（比如真实标签是1，模型预测概率接近0），“预测值-真实值”这一项很大，但“Sigmoid的导数”这一项却<strong>趋近于0</strong>！导致最终的梯度非常小。<br><strong>结论就是：模型在错得最离谱的时候，梯度反而消失了，学习得最慢。</strong> 这完全违背了我们希望模型“知错能改，大错快改”的初衷。</li>
+<li><strong>交叉熵的梯度优势：</strong><br>交叉熵损失函数经过数学上的巧妙设计，其梯度（相对于激活前的输出<code>z</code>）可以被推导和化简为一个非常简洁优美的形式：<strong><code>预测概率 - 真实值</code></strong>（即 <code>p - y</code>）。<br><strong>这就完美了！</strong> 梯度的大小直接正比于预测误差的大小。模型错得越多，梯度就越大，参数更新的步长就越大，学习得就越快。这提供了一个非常稳定且高效的学习信号。</li>
+</ul>
+<p><strong>2. 损失函数的目标不匹配：MSE“关心错了重点”</strong></p>
+<ul>
+<li><strong>MSE的目标：</strong> 它衡量的是预测值与真实值（0或1）在<strong>数值上</strong>的距离。它希望预测的概率值 <code>p</code> 在数值上离 <code>y</code> 越近越好。</li>
+<li><strong>交叉熵的目标：</strong> 它衡量的是模型对<strong>正确答案预测的置信度</strong>。</li>
+<li><strong>举例说明：</strong> 假设真实标签为1。<ul>
+<li>预测A：<code>p=0.6</code>，模型“有点把握”。</li>
+<li>预测B：<code>p=0.1</code>，模型“错得离谱”。</li>
+<li><strong>MSE的视角：</strong> 它觉得A的误差是0.4，B的误差是0.9。惩罚的差异是有限的。</li>
+<li><strong>交叉熵的视角：</strong> 损失分别是 <code>log(0.6)</code> 和 <code>log(0.1)</code>。由于log函数的特性，对低概率的惩罚是<strong>指数级增长</strong>的。<code>log(0.1)</code> 比 <code>log(0.6)</code> 要大得多得多。它会给那个“错得离谱”的预测B一个极其巨大的惩罚，迫使模型去修正这个严重的错误。</li>
+</ul>
+</li>
+</ul>
+<p><strong>总结：</strong><br>“在分类问题中，我们选择交叉熵而不是MSE，主要有两个原因：</p>
+<ol>
+<li><strong>从梯度来看：</strong> MSE与Sigmoid等激活函数结合时，在模型预测错误的情况下会出现梯度消失问题，导致学习缓慢。而交叉熵的梯度形式非常优雅，梯度大小与误差成正比，能提供更稳定高效的优化路径。</li>
+<li><strong>从优化目标来看：</strong> MSE关心的是数值上的差异，而交叉熵关心的是模型对正确类别的预测置信度。交叉熵的对数形式能极大地惩罚那些“自信的错误预测”，这与分类任务的目标——最大化正确类别的概率——是完全一致的。”</li>
+</ol>
+<h3 id="2-2-回归问题的选择：MSE-MAE-与-Huber-Loss"><a href="#2-2-回归问题的选择：MSE-MAE-与-Huber-Loss" class="headerlink" title="2.2 回归问题的选择：MSE, MAE 与 Huber Loss"></a><strong>2.2 回归问题的选择：MSE, MAE 与 Huber Loss</strong></h3><p>当模型的预测目标是一个连续值，如预测用户观看视频的时长、预测商品的价格时，我们就需要回归损失函数来衡量预测值 <code>ŷ</code> 和真实值 <code>y</code> 之间的数值差距。</p>
+<p><strong>2.2.1 MSE vs. MAE：对离群点的敏感度与收敛点（均值vs.中位数）的差异</strong></p>
+<p><strong>1. MSE (Mean Squared Error, 均方误差)</strong></p>
+<ul>
+<li><p><strong>公式：</strong></p>
+<p>  $$<br>  MSE &#x3D; \frac{1}{n} \sum_{i&#x3D;1}^{n} (\hat{y}_i - y_i)^2<br>  $$</p>
+</li>
+<li><p><strong>核心思想：</strong> 惩罚误差的<strong>平方</strong>。这是一种“严厉”的惩罚机制，误差越大，损失会呈指数级增长。</p>
+</li>
+<li><p><strong>对离群点的敏感度：非常敏感。</strong></p>
+<ul>
+<li><strong>原因：</strong> 由于损失是误差的平方，一个离群点（即 <code>y</code> 与 <code>ŷ</code> 差距极大的点）会产生一个巨大的损失值。为了最小化总损失，模型会被迫投入过多精力去“迁就”这一个离群点，可能会导致其对其他正常数据的拟合效果变差。整个模型的预测线会被离群点“拽”过去。</li>
+</ul>
+</li>
+<li><p><strong>收敛点特性：</strong></p>
+<ul>
+<li>最小化 MSE 的模型，其预测结果会收敛于目标值的<strong>条件均值 (Conditional Mean)</strong>。</li>
+<li><strong>理解：</strong> 均值本身就是一个对离群点非常敏感的统计量（比如一个亿万富翁可以显著拉高整个小区的平均收入）。因此，一个以均值为优化目标的模型，自然也会对离群点敏感。</li>
+</ul>
+</li>
+<li><p><strong>优点：</strong> 数学上，MSE 的损失函数处处可导且平滑，优化过程非常稳定高效。</p>
+</li>
+</ul>
+<p><strong>2. MAE (Mean Absolute Error, 平均绝对误差)</strong></p>
+<ul>
+<li><p><strong>公式：</strong></p>
+<p>  $$<br>  MAE &#x3D; \frac{1}{N} \sum_{i&#x3D;1}^{N} |y_i - \hat{y}_i|<br>  $$</p>
+</li>
+<li><p><strong>核心思想：</strong> 惩罚误差的<strong>绝对值</strong>。这是一种“温和”的惩罚机制，损失与误差呈线性关系。</p>
+</li>
+<li><p><strong>对离群点的敏感度：非常鲁棒 (Robust)。</strong></p>
+<ul>
+<li><strong>原因：</strong> 即使一个离群点产生了巨大的误差，它对总损失的贡献也是线性的，不会被不成比例地放大。因此，模型有能力“忽视”这些极端值，而专注于拟合数据的主体部分，不会轻易被带偏。</li>
+</ul>
+</li>
+<li><p><strong>收敛点特性：</strong></p>
+<ul>
+<li>最小化 MAE 的模型，其预测结果会收敛于目标值的<strong>条件中位数 (Conditional Median)</strong>。</li>
+<li><strong>理解：</strong> 中位数是一个对离群点非常鲁棒的统计量（无论那个亿万富翁多有钱，小区的收入中位数都不会有太大变化）。因此，以中位数为优化目标的模型，自然也继承了这种鲁棒性。</li>
+</ul>
+</li>
+<li><p><strong>缺点：</strong> 在误差为0的点，MAE 的导数不连续（有一个“拐点”），这可能导致在接近最优解时，梯度仍在-1和1之间跳跃，不利于模型进行精细的收敛。</p>
+</li>
+</ul>
+<hr>
+<p><strong>2.2.2 Huber Loss：集大成者的稳健选择</strong></p>
+<p>既然 MSE 和 MAE 各有优劣，Huber Loss 便应运而生，它试图集二者之长。</p>
+<ul>
+<li><strong>核心思想：</strong> 它是一个<strong>分段函数</strong>，兼具了智慧与灵活性。<ul>
+<li><strong>当误差较小时 (<code>|y - ŷ| ≤ δ</code>)：</strong> 此时损失函数等同于 <strong>MSE</strong>。这保证了在接近最优解时，损失函数平滑可导，梯度会平稳地减小，利于模型进行精细的收敛。</li>
+<li><strong>当误差较大时 (<code>|y - ŷ| &gt; δ</code>)：</strong> 此时损失函数等同于 <strong>MAE</strong>（但形式上有所调整以保证连接处平滑）。这保证了当遇到离群点时，损失不会被过度放大，模型依然保持鲁棒。</li>
+</ul>
+</li>
+<li><strong><code>δ</code> (delta)</strong> 是一个超参数，它定义了“小误差”和“大误差”之间的边界。</li>
+</ul>
+<p><strong>总结：</strong></p>
+<p>“在回归任务中，MSE、MAE和Huber Loss是最核心的三种损失函数。</p>
+<ul>
+<li><strong>MSE</strong> 对大误差惩罚最重，对离群点最敏感，它的优化目标是预测数据的<strong>均值</strong>。优点是优化过程平滑稳定。</li>
+<li><strong>MAE</strong> 对所有误差的惩罚是线性的，对离群点非常鲁棒，它的优化目标是预测数据的<strong>中位数</strong>。缺点是在最优解附近梯度不稳定。</li>
+<li><strong>Huber Loss</strong> 是两者的结合。它在误差小时使用MSE的特性，保证收敛精度；在误差大时使用MAE的特性，保证模型鲁棒性。</li>
+</ul>
+<p>在选择时，如果数据比较干净，我会优先考虑 <strong>MSE</strong>。如果数据中含有较多噪音或离群点，比如在搜广推场景中预测用户的观看时长或消费金额这类长尾分布的数据，为了保证模型的稳健性，<strong>Huber Loss</strong> 通常是比 MAE 更好的实践选择。”</p>
+<h3 id="2-3-解决特定难题的进阶损失函数"><a href="#2-3-解决特定难题的进阶损失函数" class="headerlink" title="2.3 解决特定难题的进阶损失函数"></a><strong>2.3 解决特定难题的进阶损失函数</strong></h3><p><strong>2.3.1 Focal Loss：应对“搜广推”场景中的样本极度不均衡问题</strong></p>
+<p><strong>1. 问题背景：样本不均衡的“诅咒”</strong></p>
+<p>在“搜广推”的核心任务——<strong>点击率（CTR）和转化率（CVR）预估</strong>中，一个普遍且棘手的问题就是样本极度不均衡。</p>
+<ul>
+<li><strong>现象：</strong> 在广告或推荐场景中，用户点击（正样本）的行为是极其稀疏的，绝大部分的曝光（负样本）并不会产生点击。正负样本的比例可能达到 <code>1:1000</code> 甚至更悬殊。</li>
+<li><strong>使用标准交叉熵的后果：</strong><ul>
+<li><strong>损失被“多数派”主导：</strong> 模型的总损失会被海量的负样本淹没。即使这些负样本都“很容易”被正确分类（比如模型预测的点击概率是0.001，非常接近真实值0），它们的总损失加起来也远远超过了少数正样本贡献的损失。</li>
+<li><strong>模型“走捷径”：</strong> 为了快速降低总损失，模型会学到一个最简单的策略：对所有样本都预测为“不点击”。这样虽然整体准确率很高（比如99.9%），但模型完全没有学到如何识别我们真正关心的、有价值的正样本，因此这个模型是毫无用处的。</li>
+</ul>
+</li>
+</ul>
+<p><strong>2. 核心思想：让模型“聚焦”于难点</strong></p>
+<p>Focal Loss 的设计哲学非常直观：<strong>我们不应该在已经学得很好的“简单题”上浪费时间，而应该把精力“聚焦”到那些模型搞不懂的“难题”上。</strong></p>
+<p>它通过修改标准的交叉熵损失，动态地降低了那些“容易分类、置信度高”的样本对总损失的贡献权重，从而让模型能够更专注于学习那些“难以分类、置信度低”的样本。</p>
+<p><strong>3. 公式与机制解析</strong></p>
+<p>我们从标准的二元交叉熵（BCE）出发，一步步演进到 Focal Loss。</p>
+<ul>
+<li><p><strong>BCE Loss:</strong></p>
+<p>  $$<br>  L_{BCE} &#x3D; -\log(p_t)<br>  $$</p>
+<p>  （其中 <code>p_t</code> 是模型对<strong>正确类别</strong>预测的概率）</p>
+</li>
+<li><p><strong>加权 BCE Loss (α-balanced):</strong></p>
+<p>  $$<br>  L_{\alpha BCE} &#x3D; -\alpha_t \log(p_t)<br>  $$</p>
+<p>  这是处理不均衡的传统方法，即为数量少的正类分配一个更高的权重 <code>α</code>，为数量多的负类分配一个较小的权重 <code>1-α</code>。这在一定程度上能缓解问题，但它无法区分样本的“难易”程度。</p>
+</li>
+<li><p><strong>Focal Loss:</strong></p>
+<p>  $$<br>  L_{F L}&#x3D;-\alpha_{t}\left(1-p_{t}\right)^{\gamma} \log \left(p_{t}\right)<br>  $$</p>
+<ul>
+<li><strong>关键创新：调制因子 (1−pt)γ</strong></li>
+<li><code>γ</code> (gamma) 被称为<strong>聚焦参数</strong>，是一个可调的超参数，通常 <code>γ ≥ 0</code>。</li>
+<li><strong>工作机制：</strong><ul>
+<li><strong>对于一个“简单”样本：</strong> 比如一个真实不点击的样本，模型很自信地预测其点击概率 <code>p=0.01</code>，那么 <code>p_t = 1-p = 0.99</code>。此时调制因子为 <code>(1-0.99)^γ = 0.01^γ</code>。如果我们取 <code>γ=2</code>，这个因子就是 <code>0.0001</code>。这意味着这个简单样本对总损失的贡献被<strong>急剧地降低了1万倍</strong>！模型被告知“你已经做得很好了，不用再管这个了”。</li>
+<li><strong>对于一个“困难”样本：</strong> 比如一个真实点击的样本，模型却不自信地只预测其点击概率 <code>p=0.1</code>，那么 <code>p_t = p = 0.1</code>。此时调制因子为 <code>(1-0.1)^γ = 0.9^γ</code>。如果我们取 <code>γ=2</code>，这个因子是 <code>0.81</code>。可以看到，这个困难样本的损失<strong>基本没有被降低</strong>。模型被告知“你在这道题上还错得很，要继续学习！”。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>总结：</strong></p>
+<p><strong>问：“在CTR预估任务中，正负样本比例非常悬殊，你会如何处理？”</strong></p>
+<blockquote>
+<p>答： “这是一个在工业界非常普遍且关键的问题。传统的解决方法如下采样或上采样，但可能会丢失信息或引入噪音。在模型层面，一个更先进和有效的方法是使用 Focal Loss 作为损失函数。</p>
+<p>Focal Loss 是对标准交叉熵损失的一种改进，它专门用于解决样本不均衡问题。其核心思想是引入了一个<strong>调制因子 <code>(1-pt)^γ</code></strong>。这个因子可以动态地、大幅地降低海量‘易分类’样本（大部分是负样本）在损失计算中的权重，从而让模型能够<strong>聚焦</strong>于学习我们更关心的、数量稀少的正样本，以及那些难以区分的样本。</p>
+<p>通过调整聚焦参数 <code>γ</code>，我们可以灵活地控制对简单样本的抑制程度。Focal Loss 几乎是处理CTR&#x2F;CVR预估这类任务时，解决样本不均衡问题的标准和首选方案之一。”</p>
+</blockquote>
+<hr>
+<p><strong>2.3.2 对比学习损失：学习优质 Embedding 的核心</strong></p>
+<p><strong>1. 为什么需要对比学习？——表征学习的目标</strong></p>
+<p>在“搜广推”系统中，我们需要处理各种各样的实体，如用户、商品、搜索词、广告等。为了让模型能够理解它们，我们首先需要将这些实体转化为计算机能够处理的低维稠密向量——<strong>Embedding</strong>。</p>
+<p>一个“好”的 Embedding 应该具备<strong>语义上的几何结构</strong>，即：<strong>相似的样本在向量空间中距离近，不相似的样本距离远</strong>。</p>
+<p>然而，像交叉熵这样的标准分类损失，其目标是“分对类别”，它并不会直接对 Embedding 在空间中的相对位置进行优化。对比学习（Contrastive Learning）就是专门为了解决这个问题而生的，它的目标就是学习出具有优良空间结构的 Embedding。</p>
+<p><strong>Contrastive Loss &amp; Triplet Loss：基于“对”和“三元组”的度量学习</strong></p>
+<p>这是对比学习的经典方法，也称为度量学习（Metric Learning）。其核心思想是，学习信号不再来自于样本的固定标签，而是来自于样本之间的两两比较。</p>
+<p><strong>1. 对比损失 (Contrastive Loss)</strong></p>
+<ul>
+<li><strong>学习单元：</strong> <strong>样本对 (Pair)</strong>，即 <code>(样本A, 样本B)</code>。</li>
+<li><strong>数据构造：</strong> 需要构造两种样本对：<ul>
+<li><strong>正样本对 (Positive Pair):</strong> A和B是相似的。例如，在推荐中，是同一个用户点击过的两件不同商品。</li>
+<li><strong>负样本对 (Negative Pair):</strong> A和B是不相似的。例如，一件用户点击过的商品和一件他曝光未点击的商品。</li>
+</ul>
+</li>
+<li><strong>优化目标：</strong><ul>
+<li>对正样本对，<strong>拉近</strong>它们在向量空间中的距离。</li>
+<li>对负样本对，<strong>推远</strong>它们的距离，但并不要求无限远，只要它们的距离大于一个预设的<strong>间隔 (margin) <code>m</code></strong> 即可。这相当于在不同类的样本之间划出一条“安全边界”。</li>
+</ul>
+</li>
+</ul>
+<p><strong>2. 三元组损失 (Triplet Loss)</strong></p>
+<ul>
+<li><strong>学习单元：</strong> <strong>三元组 (Triplet)</strong>，即 <code>(Anchor, Positive, Negative)</code>。</li>
+<li><strong>数据构造：</strong><ul>
+<li><code>Anchor</code> (锚点)：一个基准样本，比如一个特定的用户 <code>u</code>。</li>
+<li><code>Positive</code> (正例)：与 <code>Anchor</code> 相似的样本，比如该用户 <code>u</code> 点击过的商品 <code>i</code>。</li>
+<li><code>Negative</code> (负例)：与 <code>Anchor</code> 不相似的样本，比如用户 <code>u</code> 未点击的商品 <code>j</code>。</li>
+</ul>
+</li>
+<li><strong>优化目标：</strong><br>它进行的是一种<strong>相对比较</strong>。目标是让“锚点到正例的距离” <strong>显著小于</strong> “锚点到负例的距离”。<ul>
+<li>即：<code>D(Anchor,Positive) + margin &lt; D(Anchor,Negative)</code></li>
+<li>损失函数会惩罚那些不满足这个条件的“坏”三元组，直到负例被推得比正例足够远（远出一个 margin 的距离）。Triplet Loss 通常比 Contrastive Loss 更常用，效果也更稳定。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>N-pair Loss &amp; InfoNCE Loss：更高效的多负例对比方法</strong></p>
+<p>Triplet Loss 一次只用一个负例，学习效率不高。如果我们能一次性让一个正例与<strong>多个</strong>负例进行对比，模型就会面临一个更难的挑战，从而学习到更具区分度的 Embedding。</p>
+<p><strong>核心思想转变：</strong> 从“度量距离远近”转变为“<strong>在众多候选中进行分类</strong>”。</p>
+<p><strong>1. N-pair Loss</strong></p>
+<ul>
+<li><strong>核心思想：</strong> 将对比学习任务转化为一个 N 分类问题。它在一个 batch 中构造 N 个正样本对，对于其中一个 <code>Anchor</code>，它的 <code>Positive</code> 是它的正确答案，而 batch 中其他 N-1 个 <code>Positive</code> 样本则都成为它的负例。模型的目标就是为这个 <code>Anchor</code> 在 N 个选项中选出正确的那个 <code>Positive</code>。</li>
+</ul>
+<p><strong>2. InfoNCE Loss (现代对比学习的标准)</strong></p>
+<ul>
+<li><strong>核心思想：</strong> InfoNCE 将“多负例对比”的思想发扬光大并系统化。它的任务可以被生动地描述为**“大海捞针”<strong>。给你一个嫌疑人（Anchor）的照片，然后给你一个有100人的广场，里面混着他的孪生兄弟（Positive）和99个路人（Negatives）。警察的要求是：“请你准确地从这100人里</strong>把他兄弟给我找出来**”。这是一个<strong>多选一的分类</strong>任务，难度显然大得多，对模型学习区分性特征的要求也更高。</li>
+</ul>
+<p>$$<br>L_{\text{InfoNCE}} &#x3D; -\log \frac{\exp(\text{sim}(q, k_+)&#x2F;\tau)}{\exp(\text{sim}(q, k_+)&#x2F;\tau) + \sum_{i&#x3D;1}^N \exp(\text{sim}(q, k_{i-})&#x2F;\tau)}<br>$$</p>
+<ul>
+<li><code>q</code> 是 anchor 的 embedding，<code>k+</code> 是 positive 的 embedding，<code>k-</code> 是 negative 的 embedding。</li>
+<li><code>sim()</code> 是余弦相似度。<code>τ</code> 是温度超参，用于调节 Softmax 的锐利度。</li>
+<li><strong>优化目标：</strong> 在一个包含 <strong>1个正例</strong> 和 <strong>N个负例</strong> 的集合中，InfoNCE 的目标是让模型能够以最高的概率<strong>识别</strong>出那个唯一的正例。</li>
+<li><strong>公式本质：</strong> 其损失函数的形式，本质上就是一个在<strong>相似度（通常是点积或余弦相似度）上计算的多分类交叉熵损失(一个标准的 Softmax + 交叉熵损失)</strong>。它通过一个 Softmax 函数，将识别问题转化为了一个概率最大化问题。</li>
+<li><strong>优势：</strong> InfoNCE 可以非常高效地利用大量的负样本（比如一个 batch 内的所有其他样本），这提供了一个非常强的学习信号，使得模型必须学习到高度精细和鲁棒的特征，才能在众多干扰项中找出正确的正例。</li>
+</ul>
+<p><strong>在“搜广推”中的核心应用：双塔模型召回</strong></p>
+<p>对比学习损失，特别是 InfoNCE，是驱动现代<strong>推荐&#x2F;搜索系统召回阶段</strong>的引擎。</p>
+<ol>
+<li><strong>模型架构：</strong> 构建<strong>双塔模型</strong>。一个“用户塔”负责将用户信息和上下文处理成 User Embedding；一个“物品塔”负责将物品信息处理成 Item Embedding。</li>
+<li><strong>训练：</strong> 使用海量的用户行为数据（如 <code>(用户, 点击物品, 曝光未点物品)</code>），通过 <strong>InfoNCE Loss</strong> 来端到端地训练双塔模型。</li>
+<li><strong>线上服务（召回）：</strong><ul>
+<li><strong>离线：</strong> 用训练好的“物品塔”计算好全量百万、千万甚至上亿个物品的 Item Embedding，存入<strong>向量数据库</strong>（如 FAISS）。</li>
+<li><strong>在线：</strong> 当用户请求到来时，用“用户塔”实时计算出该用户的 User Embedding。</li>
+<li><strong>匹配：</strong> 使用<strong>近似最近邻（ANN）搜索</strong>技术，在毫秒级别内，从海量物品库中，找出与用户 Embedding 最相似（点积最大）的几百或几千个候选物品。</li>
+</ul>
+</li>
+<li><strong>完成召回：</strong> 这几百上千个物品就构成了召回集，它们将被送入下一步更复杂的**排序（Ranking）**模型中进行精排。</li>
+</ol>
+<hr>
+<p><strong>2.3.3 Center Loss：提升特征的类内紧凑性</strong></p>
+<p><strong>1. 问题背景：分得开，但不够“好”</strong></p>
+<p>标准的分类损失函数，如<strong>交叉熵 (Cross-Entropy)</strong>，其主要目标是让模型学习到<strong>可分性 (Separability)</strong>。也就是说，它会努力地将不同类别的样本特征在向量空间中推开，使得分类器能够画出一条清晰的决策边界。</p>
+<p>然而，交叉熵并<strong>不关心同一类别内部的样本特征是否紧凑</strong>。这可能导致一个问题：虽然不同类别分开了，但每个类别内部的特征分布可能非常“松散”，像一盘散沙。这种高“<strong>类内方差 (Intra-class Variation)</strong>”会使得模型的决策边界非常脆弱，抗干扰能力差，学习到的特征也不够有代表性。</p>
+<p><strong>2. 核心思想：在“推开”的同时，也要“拉近”</strong></p>
+<p>Center Loss 的设计思想非常直观：它作为一种<strong>正则化项</strong>，与主要的分类损失（如交叉熵）<strong>协同工作</strong>，以实现两个目标：</p>
+<ol>
+<li><strong>交叉熵损失 (主任务):</strong> 负责将<strong>不同</strong>类别的特征簇（Inter-class）<strong>推开</strong>。</li>
+<li><strong>Center Loss (辅助任务):</strong> 负责将<strong>相同</strong>类别内的样本特征（Intra-class）向该类的中心点<strong>拉近</strong>。</li>
+</ol>
+<p><strong>总损失函数公式：</strong></p>
+<p>$$<br>L_{\text{Total}} &#x3D; L_{\text{Softmax}} + \lambda \cdot L_{\text{Center}}<br>\<br>L_{\text{Center}} &#x3D; \frac{1}{2} \sum_{i&#x3D;1}^{N} | \mathbf{x}<em>i - \mathbf{c}</em>{y_i} |_2^2<br>$$</p>
+<ul>
+<li><code>$L_&#123;Softmax&#125;$</code> 就是我们熟悉的交叉熵损失。</li>
+<li><code>$L_&#123;Center&#125;$</code> 计算了每个样本的特征向量 <code>x_i</code> 到其对应类别（由标签 <code>y_i</code> 决定）的中心 <code>c_yi</code> 的距离的平方和。</li>
+<li><code>λ</code> 是一个平衡超参数，用于控制“拉近”这个辅助任务的重要性。</li>
+</ul>
+<p><strong>3. 工作机制：双重更新的动态过程</strong></p>
+<p>为了实现“拉近”这个目标，Center Loss 在训练过程中引入了一个双重更新的机制：</p>
+<ol>
+<li><strong>更新网络参数 <code>θ</code>：</strong> 在反向传播时，模型的权重不仅接收来自交叉熵损失的梯度，也接收来自 Center Loss 的梯度。Center Loss 的梯度会“指示”网络权重进行调整，使得下一次该样本输出的特征 <code>x_i</code> 会<strong>更靠近</strong>它的类别中心 <code>c_yi</code>。</li>
+<li><strong>更新类别中心 <code>c</code>：</strong> 类别中心 <code>c</code> 本身也不是固定不变的。在每个 mini-batch 训练后，每个类别中心都会根据该 batch 中属于它的那些样本的特征，向它们的<strong>均值方向</strong>进行移动。</li>
+</ol>
+<p>这个“<strong>模型权重更新</strong>”和“<strong>类别中心更新</strong>”交替进行的过程，就像一个动态的“捏面团”过程：网络努力地把“面”（特征）往“中心”送，而“中心”也在不断地移动到“面”最密集的地方。经过多轮迭代，最终每个类别的特征就会被“捏”成一个非常紧凑、密实的特征簇。</p>
+<p><strong>4. 对比其它方法</strong></p>
+<ul>
+<li><strong>与 Contrastive&#x2F;Triplet Loss 的区别：</strong> 对比学习关注的是样本<strong>之间</strong>的相对距离（比如A离B比离C更近）。而 Center Loss 关注的是每个样本与它所属的那个<strong>全局类别中心</strong>的绝对距离。Center Loss 的实现相对更简单，因为它不需要构造复杂的样本对或三元组。</li>
+</ul>
+<p><strong>5. 在“搜广推”中的应用</strong><br>Center Loss 在“搜广推”中属于一个更精细化的“工具”，适用于对特征判别性要求高的场景。</p>
+<ul>
+<li><strong>细粒度分类：</strong> 当需要对商品或广告进行非常精细的类目划分时（比如“红色iPhone手机壳” vs “粉色iPhone手机壳”），使用 Center Loss 可以让学习到的 Embedding 更具区分度，边界更清晰。</li>
+<li><strong>用户&#x2F;广告风格聚类：</strong> 对广告创意素材按风格进行分类时，Center Loss 可以让同种风格的素材在向量空间中聚合得更紧，有利于后续进行风格化的推荐或分析。</li>
+<li><strong>作为辅助损失：</strong> 在多任务学习模型中，可以引入 Center Loss 作为一个辅助任务，来提升模型中间共享层 Embedding 的质量，从而惠及所有下游任务。</li>
+</ul>
+<p><strong>总结：</strong><br>“Center Loss 不是一个独立的损失函数，而是一个与交叉熵等主分类损失配合使用的<strong>正则化项</strong>。它的核心目标是通过最小化<strong>类内方差</strong>，来提升模型学习到的特征的<strong>判别性</strong>和<strong>鲁棒性</strong>。</p>
+<p>它的工作机制是，在交叉熵负责推开不同类别特征的同时，Center Loss 会额外惩罚每个样本特征与其所属类别中心之间的距离，从而在训练中将同一类别的样本向其中心‘拉近’。这最终会使得学习到的特征不仅类别间可分，而且类别内高度紧凑，在一些细粒度分类或对特征质量要求高的任务中非常有价值。”</p>
+<h2 id="第三部分：理论深度：统计与优化原理-Theoretical-Depth-Statistical-Optimization-Principles"><a href="#第三部分：理论深度：统计与优化原理-Theoretical-Depth-Statistical-Optimization-Principles" class="headerlink" title="第三部分：理论深度：统计与优化原理 (Theoretical Depth: Statistical &amp; Optimization Principles)"></a><strong>第三部分：理论深度：统计与优化原理 (Theoretical Depth: Statistical &amp; Optimization Principles)</strong></h2><h3 id="3-1-参数估计的两种视角：最大似然-MLE-与最大后验-MAP"><a href="#3-1-参数估计的两种视角：最大似然-MLE-与最大后验-MAP" class="headerlink" title="3.1 参数估计的两种视角：最大似然(MLE)与最大后验(MAP)"></a><strong>3.1 参数估计的两种视角：最大似然(MLE)与最大后验(MAP)</strong></h3><p>当我们训练一个模型时，本质上是在“估计”一组最能描述数据的参数 <code>θ</code>。对于如何找到“最好”的参数，统计学界主要有两种观点。</p>
+<p><strong>1. 最大似然估计 (Maximum Likelihood Estimation, MLE)</strong></p>
+<ul>
+<li><strong>核心思想 (频率派观点)：</strong><br>MLE 认为模型的真实参数 <code>θ</code> 是一个未知的<strong>固定常量</strong>。它的目标是：找到这样一组参数 <code>θ</code>，使得我们已经观测到的这批训练数据 <code>D</code> 出现的<strong>概率最大</strong>。<ul>
+<li><strong>直观比喻：</strong> 你捡到一枚硬币，抛了10次，出现了7次正面。MLE会问：“这枚硬币的正面朝上概率 <code>p</code> 是多少时，‘10次抛出7次正面’这个结果出现的可能性最大？” 答案是 <code>p=0.7</code>。MLE完全相信数据，数据告诉我们什么，它就认为真相是什么。</li>
+</ul>
+</li>
+<li><strong>数学表示：</strong> 目标是最大化似然函数 L(θ)&#x3D;P(D∣θ)。</li>
+</ul>
+<p><strong>3.1.1 损失函数与 MLE 的血缘关系</strong></p>
+<p>我们日常使用的损失函数，正是 <strong>“最小化损失函数” 等价于 “最大化对数似然”</strong> 这一原则的体现。</p>
+<ul>
+<li><strong>核心转换：</strong><code>最大化 Likelihood</code> ⇔ <code>最大化 log(Likelihood)</code> (取对数不改变极值点，但将连乘变为连加，便于计算) ⇔ <strong><code>最小化 -log(Likelihood)</code></strong><br>这个 <strong>负对数似然 <code>log(Likelihood)</code></strong>，就是我们各种损失函数的“真身”。</li>
+<li><strong>交叉熵的推导 (分类问题):</strong><ul>
+<li><p><strong>假设：</strong> 我们假设二分类问题的标签 <code>y</code> 服从<strong>伯努利分布</strong>。</p>
+</li>
+<li><p><strong>推导：</strong> 单个样本的似然是</p>
+<p>  $$<br>  P(y|x) &#x3D; p^y(1-p)^{1-y}<br>  $$</p>
+<p>  取负对数似然，得到:</p>
+<p>  $$<br>  -[y\log(p)+(1 - y) \log(1 - p)]<br>  $$</p>
+</li>
+<li><p><strong>结论：</strong> 这正是我们熟悉的<strong>二元交叉熵 (BCE) 损失</strong>！因此，当我们在分类任务中使用交叉熵损失时，我们实际上是在对一个假设输出服从伯努利&#x2F;类别分布的模型进行最大似然估计。</p>
+</li>
+</ul>
+</li>
+<li><strong>MSE的推导 (回归问题):</strong><ul>
+<li><strong>假设：</strong> 我们假设真实值 <code>y</code> 等于模型预测值 <code>f(x)</code> 加上一个服从**正态分布（高斯分布）**的零均值噪声 <code>ε</code>。</li>
+<li><strong>推导：</strong> 在这个假设下，<code>y</code> 的概率密度函数的负对数似然，其需要最小化的部分正比于 <code>(y−f(x))^2</code>。</li>
+<li><strong>结论：</strong> 这正是<strong>均方误差 (MSE) 损失</strong>！因此，使用MSE等于在假设误差服从高斯分布的前提下进行最大似然估计。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>2. 最大后验概率估计 (Maximum A Posteriori, MAP)</strong></p>
+<ul>
+<li><strong>核心思想 (贝叶斯派观点):</strong><br>MAP 认为参数 <code>θ</code> 不是固定的，它本身也是一个随机变量，在看到数据之前，我们可能对它有一个<strong>先验的认知</strong>，记为 <strong><code>P(θ)</code></strong>。<br>MAP的目标是：综合考虑“<strong>数据 <code>D</code></strong>”和我们的“<strong>先验认知 <code>P(θ)</code></strong>”，找到一个最合理的参数 <code>θ</code>。</li>
+<li><strong>数学表示（贝叶斯定理）：</strong> 目标是最大化后验概率 <code>P(θ∣D)</code>。</li>
+</ul>
+<p>[](data:image&#x2F;svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400em" height="0.548em" viewbox="0 0 400000 548" preserveaspectratio="xMinYMin slice"><path d="M0 6l6-6h17c12.688 0 19.313.3 20 1 4 4 7.313 8.3 10 13
+ 35.313 51.3 80.813 93.8 136.5 127.5 55.688 33.7 117.188 55.8 184.5 66.5.688
+ 0 2 .3 4 1 18.688 2.7 76 4.3 172 5h399450v120H429l-6-1c-124.688-8-235-61.7
+-331-161C60.687 138.7 32.312 99.3 7 54L0 41V6z"/></svg>)</p>
+<p>[](data:image&#x2F;svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400em" height="0.548em" viewbox="0 0 400000 548" preserveaspectratio="xMidYMin slice"><path d="M199572 214
+c100.7 8.3 195.3 44 280 108 55.3 42 101.7 93 139 153l9 14c2.7-4 5.7-8.7 9-14
+ 53.3-86.7 123.7-153 211-199 66.7-36 137.3-56.3 212-62h199568v120H200432c-178.3
+ 11.7-311.7 78.3-403 201-6 8-9.7 12-11 12-.7.7-6.7 1-18 1s-17.3-.3-18-1c-1.3 0
+-5-4-11-12-44.7-59.3-101.3-106.3-170-141s-145.3-54.3-229-60H0V214z"/></svg>)</p>
+<p>$$<br>\underset{\theta}{\text{argmax}} P(\theta|D) \propto \underset{\theta}{\text{argmax}} \left[ P(D|\theta) \cdot P(\theta) \right]<br>$$</p>
+<p>[](data:image&#x2F;svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400em" height="0.548em" viewbox="0 0 400000 548" preserveaspectratio="xMaxYMin slice"><path d="M399994 0l6 6v35l-6 11c-56 104-135.3 181.3-238 232-57.3
+ 28.7-117 45-179 50H-300V214h399897c43.3-7 81-15 113-26 100.7-33 179.7-91 237
+-174 2.7-5 6-9 10-13 .7-1 7.3-1 20-1h17z"/></svg>)</p>
+<p>[](data:image&#x2F;svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400em" height="0.548em" viewbox="0 0 400000 548" preserveaspectratio="xMinYMin slice"><path d="M0 6l6-6h17c12.688 0 19.313.3 20 1 4 4 7.313 8.3 10 13
+ 35.313 51.3 80.813 93.8 136.5 127.5 55.688 33.7 117.188 55.8 184.5 66.5.688
+ 0 2 .3 4 1 18.688 2.7 76 4.3 172 5h399450v120H429l-6-1c-124.688-8-235-61.7
+-331-161C60.687 138.7 32.312 99.3 7 54L0 41V6z"/></svg>)</p>
+<p>[](data:image&#x2F;svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400em" height="0.548em" viewbox="0 0 400000 548" preserveaspectratio="xMidYMin slice"><path d="M199572 214
+c100.7 8.3 195.3 44 280 108 55.3 42 101.7 93 139 153l9 14c2.7-4 5.7-8.7 9-14
+ 53.3-86.7 123.7-153 211-199 66.7-36 137.3-56.3 212-62h199568v120H200432c-178.3
+ 11.7-311.7 78.3-403 201-6 8-9.7 12-11 12-.7.7-6.7 1-18 1s-17.3-.3-18-1c-1.3 0
+-5-4-11-12-44.7-59.3-101.3-106.3-170-141s-145.3-54.3-229-60H0V214z"/></svg>)</p>
+<p>[](data:image&#x2F;svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400em" height="0.548em" viewbox="0 0 400000 548" preserveaspectratio="xMaxYMin slice"><path d="M399994 0l6 6v35l-6 11c-56 104-135.3 181.3-238 232-57.3
+ 28.7-117 45-179 50H-300V214h399897c43.3-7 81-15 113-26 100.7-33 179.7-91 237
+-174 2.7-5 6-9 10-13 .7-1 7.3-1 20-1h17z"/></svg>)</p>
+<p><code>MAP = 似然 × 先验, P(D∣θ)=似然, P(θ)=先验</code></p>
+<p><strong>3.1.2 正则化的贝叶斯解释：L1&#x2F;L2 分别对应何种先验？</strong></p>
+<p>这揭示了正则化项的深刻本质：<strong>正则化 &#x3D; 在损失函数中引入先验信念</strong>。</p>
+<ul>
+<li><p><strong>推导：</strong><code>最大化 Likelihood × Prior</code> ⇔ <code>最大化 log(Likelihood) + log(Prior)</code> ⇔ <strong><code>最小化 [-log(Likelihood)] + [-log(Prior)]</code></strong></p>
+<p>  我们发现，MAP的目标函数变成了： <strong><code>最小化 损失函数 + 参数的先验证罚项</code></strong></p>
+<ul>
+<li><strong><code>log(Likelihood)</code>：</strong> 就是我们从MLE推导出的损失函数（如交叉熵或MSE）。</li>
+<li><strong><code>log(Prior)</code>：</strong> 就是我们要添加的<strong>正则化项</strong>！</li>
+</ul>
+</li>
+<li><p><strong>L1&#x2F;L2 正则化与先验的对应关系 :</strong></p>
+<ul>
+<li><strong>L2 正则化 (Ridge Regression):</strong> 如果我们对参数的先验信念是“<strong>参数 <code>θ</code> 应该比较小，并且集中在0附近</strong>”，这种信念可以用一个<strong>高斯先验 (Gaussian Prior)</strong> 来数学化描述。高斯分布的负对数正好是 <code>θ</code> 的二次方项。因此，<strong>MAP + 高斯先验 &#x3D; 损失函数 + L2正则化</strong>。</li>
+<li><strong>L1 正则化 (Lasso Regression):</strong> 如果我们的先验信念是“<strong>参数 <code>θ</code> 应该非常稀疏，即很多参数值应该正好是0</strong>”，这种信念可以用<strong>拉普拉斯先验 (Laplace Prior)</strong> 来描述。拉普拉斯分布的负对数正好是 <code>θ</code> 的绝对值项。因此，<strong>MAP + 拉普拉斯先验 &#x3D; 损失函数 + L1正则化</strong>。</li>
+</ul>
+</li>
+<li><p><strong>MLE 与 MAP 的统一：</strong><br>如果对参数没有任何先验信念，即认为所有参数取值的可能性都一样，这就是<strong>均匀分布先验</strong>。此时 <code>P(θ)</code> 是一个常数，<code>log(P(θ))</code> 也是常数，在优化中可以忽略。MAP 就退化为了 MLE。所以，<strong>MLE 是 MAP 在“无信息先验”下的一种特例</strong>。</p>
+</li>
+</ul>
+<h3 id="3-2-“分布”的核心概念解读"><a href="#3-2-“分布”的核心概念解读" class="headerlink" title="3.2 “分布”的核心概念解读"></a><strong>3.2 “分布”的核心概念解读</strong></h3><p>“分布”是用来描述<strong>数据整体面貌和内在规律</strong>的语言。理解了数据的分布，就等于掌握了它的“性格”。</p>
+<p><strong>3.2.1 什么是分布？（经验分布 vs. 理论分布）</strong></p>
+<ul>
+<li><strong>直观定义：</strong> 分布描述了一组数据中，各个数值的<strong>疏密程度</strong>和<strong>排列模式</strong>。它告诉我们哪些值更常见，哪些值更稀有。</li>
+<li><strong>两种视角看分布：</strong><ol>
+<li><strong>经验分布 (Empirical Distribution):</strong><ul>
+<li><strong>是什么：</strong> 这是我们通过<strong>直接观察</strong>手中有限的样本数据而得到的分布。它是对我们<strong>已有数据</strong>的最真实写照。</li>
+<li><strong>怎么看：</strong> 最常用的方法就是画<strong>直方图 (Histogram)</strong>。直方图的形状，就是这批数据的经验分布。它很直观，但可能因为数据的随机性而不够平滑，且不具备很好的泛化性。</li>
+</ul>
+</li>
+<li><strong>理论分布 (Theoretical Distribution):</strong><ul>
+<li><strong>是什么：</strong> 这是一个用<strong>数学函数</strong>来描述的、理想化的、平滑的分布。</li>
+<li><strong>为什么用：</strong> 当我们观察到经验分布的形状（比如直方图的“山包”）与某个经典的数学函数很像时，我们就可以用这个简洁的数学函数来**近似地“建模”**我们的数据。这样做的好处是，模型变得非常简洁，并且具有很好的统计性质和泛化能力。</li>
+<li><strong>常见例子：</strong><ul>
+<li><strong>正态分布（高斯分布）：</strong> 对称的“钟形”曲线，由均值<code>μ</code>和标准差<code>σ</code>决定。在自然界和工业界中极为常见。</li>
+<li><strong>伯努利分布：</strong> 单次“是&#x2F;否”试验的分布，由单次成功的概率<code>p</code>决定。是CTR预估等二分类问题的基础。</li>
+<li><strong>均匀分布：</strong> 所有可能结果的发生概率都相等，如掷一枚均匀的骰子。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+<p><strong>3.2.2 “求XX数据的分布”具体指什么？</strong></p>
+<p>这句话在实践中通常指一个两步走的过程：</p>
+<ol>
+<li><strong>探索性分析：</strong> 首先，通过<strong>可视化</strong>（如画直方图）等手段，观察你手中这批数据的<strong>经验分布</strong>，了解它的实际形状、中心位置、离散程度等。</li>
+<li><strong>模型拟合：</strong> 然后，根据观察到的形状，选择一个合适的<strong>理论分布</strong>去近似它。并利用手中的数据去<strong>估计</strong>这个理论分布的参数。<ul>
+<li><strong>例如：</strong> “求用户年龄的分布” -&gt; 画出年龄的直方图，发现它呈现钟形 -&gt; 假设它服从正态分布 -&gt; 计算样本的平均年龄作为<code>μ</code>的估计值，计算样本的标准差作为<code>σ</code>的估计值 -&gt; 得出结论：“用户年龄近似服从均值为32，标准差为8的正态分布”。</li>
+</ul>
+</li>
+</ol>
+<h3 id="3-3-优化的“地形”：凸函数与非凸函数"><a href="#3-3-优化的“地形”：凸函数与非凸函数" class="headerlink" title="3.3 优化的“地形”：凸函数与非凸函数"></a><strong>3.3 优化的“地形”：凸函数与非凸函数</strong></h3><p>机器学习的训练过程，就是在一个由损失函数定义的、高低不平的“地形”上，寻找最低点的过程。这个“地形”的形状，决定了寻找最低点（最优解）的难度。</p>
+<p><strong>3.3.1 为何凸优化是“理想型”？</strong></p>
+<ul>
+<li><strong>“地形”特征：</strong> 凸函数的“地形”像一个完美的<strong>碗</strong>。</li>
+<li><strong>核心优点：</strong><ol>
+<li><strong>全局唯一最优解：</strong> 在这个“碗”里，只存在<strong>一个</strong>最低点，任何局部最低点都必然是全局最低点。</li>
+<li><strong>保证收敛：</strong> 使用梯度下降等优化算法，无论从“碗”的哪个位置开始下滑，最终都<strong>保证</strong>能到达那个唯一的全局最优点。</li>
+</ol>
+</li>
+<li><strong>结论：</strong> 拥有凸损失函数的模型（如逻辑回归、线性回归）进行优化是<strong>稳定、可靠且结果可复现的</strong>。这使得凸优化成为我们最希望遇到的“理想情况”。</li>
+</ul>
+<p><strong>3.3.2 深度学习中的非凸优化意味着什么？</strong></p>
+<ul>
+<li><strong>“地形”特征：</strong> 深度神经网络的损失函数是高度<strong>非凸</strong>的，其“地形”像一个极其复杂的<strong>山脉</strong>，充满了无数高低不同、大小不一的“山谷”（局部最优点）。</li>
+<li><strong>对训练的深刻影响：</strong><ol>
+<li><strong>无法保证全局最优：</strong> 我们通过梯度下降找到的解，几乎可以肯定只是众多局部最优点中的一个，无法保证它是全局最好的解。我们的目标是找到一个“足够好”的局部最优解。</li>
+<li><strong>对初始化高度敏感：</strong> 初始权重的位置，决定了你从哪个“山峰”开始往下走，最终可能落入完全不同的“山谷”，导致模型性能差异巨大。这就是 <strong>He 初始化</strong> 等方法至关重要的原因。</li>
+<li><strong>优化器至关重要：</strong> 简单的梯度下降法很容易在“山谷”间被困住。而 <strong>Adam</strong> 等更先进的自适应优化器，通过引入动量等机制，像一辆性能更强的越野车，能帮助我们更好地“探索”这个复杂的地形，有机会越过一些小的障碍，找到更深的“山谷”。</li>
+<li><strong>超参数决定路径：</strong> 学习率、batch size等超参数的选择，直接影响了下降的路径和速度，是深度学习“炼丹”的关键所在。</li>
+</ol>
+</li>
+</ul>
+<p><strong>总结：</strong><br>“优化是机器学习的核心。凸优化问题，如逻辑回归，因其拥有唯一的全局最优解而非常稳定。相比之下，深度学习是一个高度非凸的优化问题，这意味着我们无法保证找到全局最优解，且训练结果对<strong>参数初始化</strong>、<strong>优化器选择</strong>和<strong>超参数设定</strong>都高度敏感。因此，在深度学习中，我们的目标是找到一个泛化能力强的、足够好的局部最优解。”</p>
+<h2 id="第四部分：经典模型对比与数据预处理-Classic-Model-Comparison-Data-Preprocessing"><a href="#第四部分：经典模型对比与数据预处理-Classic-Model-Comparison-Data-Preprocessing" class="headerlink" title="第四部分：经典模型对比与数据预处理 (Classic Model Comparison &amp; Data Preprocessing)"></a><strong>第四部分：经典模型对比与数据预处理 (Classic Model Comparison &amp; Data Preprocessing)</strong></h2><h3 id="4-1-两大线性分类器：SVM-vs-逻辑回归-LR"><a href="#4-1-两大线性分类器：SVM-vs-逻辑回归-LR" class="headerlink" title="4.1 两大线性分类器：SVM vs. 逻辑回归(LR)"></a><strong>4.1 两大线性分类器：SVM vs. 逻辑回归(LR)</strong></h3><p>SVM 和 LR 都是监督学习中用于分类的强大算法，当面试官要求对比它们时，他想考察的是你是否理解两者在<strong>核心思想、损失函数和应用场景</strong>上的本质区别。</p>
+<p><strong>4.1.1 核心思想对比：最大间隔 vs. 最大似然</strong></p>
+<ol>
+<li><strong>支持向量机 (SVM) 的哲学：最大间隔 (Maximum Margin)</strong><ul>
+<li><strong>核心思想：</strong> SVM 是一个“<strong>边境防御</strong>”模型。它只关心那些离决策边界最近的、最难区分的样本点，这些点被称为<strong>支持向量 (Support Vectors)</strong>。SVM 的目标是在这些“边境哨兵”之间，找到一个能使“军事缓冲区”（即<strong>间隔，Margin</strong>）最宽的决策边界。</li>
+<li><strong>损失函数：Hinge Loss</strong>。这个损失函数的设计非常巧妙，它只对那些落在间隔内或者被分错的样本点进行惩罚。对于那些远离边界、被轻松正确分类的点，其损失为0。这完美体现了 SVM “只关心支持向量”的极简主义思想。</li>
+<li><strong>动机：</strong> 几何驱动。它追求的是在特征空间中最“安全”、最鲁棒的划分。</li>
+</ul>
+</li>
+<li><strong>逻辑回归 (LR) 的哲学：最大似然 (Maximum Likelihood)</strong><ul>
+<li><strong>核心思想：</strong> LR 是一个“<strong>民主投票</strong>”模型。它关心<strong>每一个样本点</strong>。它的目标是找到一个决策边界，使得在现有数据分布下，所有样本被正确分类的<strong>总概率</strong>最大。</li>
+<li><strong>损失函数：Log Loss (交叉熵)</strong>。我们之前已经深入探讨过，这个损失函数源于最大似然估计。任何一个样本，只要其预测概率不为1，都会对总损失产生贡献。样本离决策边界越远，其贡献越小，但永远不会为0。</li>
+<li><strong>动机：</strong> 概率驱动。它追求的是对数据整体分布的最佳概率拟合。</li>
+</ul>
+</li>
+</ol>
+<p><strong>主要技术差异总结：</strong></p>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th><strong>支持向量机 (SVM)</strong></th>
+<th><strong>逻辑回归 (LR)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>核心思想</strong></td>
+<td><strong>最大间隔</strong></td>
+<td><strong>最大似然</strong></td>
+</tr>
+<tr>
+<td><strong>损失函数</strong></td>
+<td>Hinge Loss</td>
+<td>Log Loss (交叉熵)</td>
+</tr>
+<tr>
+<td><strong>关注点</strong></td>
+<td>只关心<strong>支持向量</strong></td>
+<td>关心<strong>所有</strong>数据点</td>
+</tr>
+<tr>
+<td><strong>输出</strong></td>
+<td>类别 &#x2F; 到超平面的距离</td>
+<td><strong>概率</strong></td>
+</tr>
+<tr>
+<td><strong>非线性处理</strong></td>
+<td><strong>核技巧 (Kernel Trick)</strong></td>
+<td><strong>特征工程</strong></td>
+</tr>
+<tr>
+<td><strong>数据敏感度</strong></td>
+<td>对非支持向量鲁棒</td>
+<td>对所有数据点敏感</td>
+</tr>
+</tbody></table>
+<p><strong>4.1.2 在“搜广推”场景下的选择与原因</strong></p>
+<p><strong>结论：</strong> 在几乎所有的“搜广推”核心场景，如 <strong>CTR&#x2F;CVR 预估</strong>中，<strong>逻辑回归（LR）及其深度学习的演进版本是绝对的主流选择</strong>。</p>
+<p><strong>核心原因：</strong></p>
+<ol>
+<li><strong>需要概率输出 (The Killer Feature):</strong> 这是最根本、最决定性的原因。<ul>
+<li><strong>排序 (Ranking):</strong> 无论是搜索结果、推荐列表还是广告排序，我们都需要一个<strong>连续的分数</strong>来对成百上千的候选项进行排序。LR 天然输出的<strong>点击概率 (CTR)</strong>，是完成这个任务最理想、最符合逻辑的度量。</li>
+<li><strong>竞价 (Bidding):</strong> 在计算广告中，广告主的出价（e.g., eCPM &#x3D; pCTR * pCVR * Bid）直接依赖于模型预测的概率值。</li>
+<li>SVM 的输出是类别，无法直接用于排序和竞价，需要额外的校准处理，效果和解释性都不如 LR。</li>
+</ul>
+</li>
+<li><strong>可扩展性与训练效率：</strong><ul>
+<li>LR 的损失函数光滑可导，非常适合使用<strong>随机梯度下降 (SGD)</strong> 及其变种进行优化。这使得 LR 能够非常方便地进行<strong>在线学习 (Online Learning)</strong> 和<strong>大规模并行化训练</strong>，完美契合了工业界海量数据、实时更新的需求。</li>
+<li>SVM 的优化问题（求解一个二次规划问题）在数据量巨大时，训练复杂度通常高于 LR。</li>
+</ul>
+</li>
+<li><strong>模型演进的基石：</strong><ul>
+<li>现代“搜广推”领域主流的深度模型，如 <strong>DeepFM</strong>, <strong>DIN</strong> 等，都可以被看作是 LR 的扩展。它们通常包含一个负责学习特征交叉的深度部分（DNN），和一个负责记忆的浅层部分（如FM或LR），最后通过一个 Sigmoid 函数输出概率。理解 LR，是理解整个现代推荐广告体系的起点。</li>
+</ul>
+</li>
+</ol>
+<p><strong>总结：</strong><br>“对于 CTR 预估这类任务，我会毫不犹豫地选择逻辑回归或其深度学习变种。最核心的理由是，<strong>LR能直接输出一个校准良好的概率</strong>，这对于排序、竞价等下游商业任务至关重要，而 SVM 无法做到这一点。此外，LR 易于大规模并行化训练和在线学习的特性，也使它更适合处理工业界的海量数据流。”</p>
+<h3 id="4-2-特征缩放：归一化-Normalization-vs-标准化-Standardization"><a href="#4-2-特征缩放：归一化-Normalization-vs-标准化-Standardization" class="headerlink" title="4.2 特征缩放：归一化(Normalization) vs. 标准化(Standardization)"></a><strong>4.2 特征缩放：归一化(Normalization) vs. 标准化(Standardization)</strong></h3><p>特征缩放是数据预处理中至关重要的一步。如果不同特征之间的数值范围（量纲）差距过大（例如，年龄在10-90之间，而年收入在30万-1000万之间），很多机器学习模型将无法正常工作。</p>
+<p><strong>为什么需要特征缩放？</strong></p>
+<ol>
+<li><strong>加速梯度下降：</strong> 对于使用梯度下降优化的模型（如逻辑回归、SVM、神经网络），特征缩放可以使损失函数的等高线图更接近于“圆形”，从而让梯度下降的过程更平顺、更快速地找到最优解。否则，瘦长的等高线会导致优化路径来回震荡，收敛缓慢。</li>
+<li><strong>消除量纲影响：</strong> 对于依赖距离计算的模型（如K-Means、KNN），特征缩放可以防止数值范围大的特征在距离计算中占据主导地位，使得所有特征能够被公平地对待。</li>
+</ol>
+<p><strong>注意：</strong> 决策树、随机森林、GBDT等<strong>树模型</strong>通常<strong>不需要</strong>进行特征缩放，因为树的分裂是基于单个特征的阈值，不受其他特征尺度的影响。</p>
+<p><strong>4.2.1 对离群点的敏感度分析与选择策略</strong></p>
+<p>这是归一化和标准化最核心的区别所在。</p>
+<p><strong>1. 归一化 (Normalization)，又称 Min-Max Scaling</strong></p>
+<ul>
+<li><p><strong>公式：</strong></p>
+<p>  $$<br>  X_{\text{norm}} &#x3D; \frac{X - X_{\text{min}}}{X_{\text{max}} - X_{\text{min}}}<br>  $$</p>
+</li>
+<li><p><strong>作用：</strong> 将数据的数值范围严格地“压缩”到 <code>[0, 1]</code> 区间内。</p>
+</li>
+<li><p><strong>对离群点的敏感度：非常敏感！</strong></p>
+<ul>
+<li><strong>例子：</strong> 假设我们有一组商品价格数据 <code>[100, 200, 300, 500]</code>。归一化后，它们的值会均匀地分布在 <code>[0, 1]</code> 之间。但如果此时进来一个<strong>离群点</strong>，比如一个奢侈品价格为 <code>50000</code>，那么 <code>X_max</code> 就会变成 <code>50000</code>。</li>
+<li><strong>后果：</strong> 此时，原来的 <code>[100, 200, 300, 500]</code> 这四个“正常”数据点，在归一化后会全部被挤压到 <code>[0, 0.01]</code> 这个极其狭小的区间内，彼此之间几乎失去了区分度。模型将很难从这些被“压扁”的数据中学到有用的信息。</li>
+</ul>
+</li>
+</ul>
+<p><strong>2. 标准化 (Standardization)，又称 Z-score Scaling</strong></p>
+<ul>
+<li><p><strong>公式：</strong> （<code>μ</code> 是均值，<code>σ</code> 是标准差）</p>
+<p>  $$<br>  X_{\text{std}} &#x3D; \frac{X-\mu}{\sigma}<br>  $$</p>
+</li>
+<li><p><strong>作用：</strong> 将数据变换为<strong>均值为0，标准差为1</strong>的分布。变换后的数据<strong>没有固定的数值范围</strong>。</p>
+</li>
+<li><p><strong>对离群点的敏感度：非常鲁棒 (Robust)！</strong></p>
+<ul>
+<li><strong>例子：</strong> 同样面对 <code>[100, 200, 300, 500, 50000]</code> 这组数据。那个 <code>50000</code> 的离群点虽然会影响 <code>μ</code> 和 <code>σ</code> 的计算，但它的影响是有限的。</li>
+<li><strong>后果：</strong> 变换后，那四个“正常”的数据点依然会以0为中心，保持一个合理的相对分布，而那个 <code>50000</code> 的离群点则会变成一个绝对值很大的Z-score（比如 <code>z=4</code> 或 <code>z=5</code>），它本身成为了一个“异常”的数值，但<strong>不会破坏其他正常数据的结构</strong>。</li>
+</ul>
+</li>
+</ul>
+<p><strong>选择策略总结：</strong></p>
+<p>“归一化和标准化是两种最常用的特征缩放方法。</p>
+<ul>
+<li><strong>归一化</strong>的优点是能将数据严格限定在 <code>[0, 1]</code>，在某些对数据范围有严格要求的场景（如图像处理中的像素值）非常有用。但它的<strong>致命缺点是对离群点极其敏感</strong>。</li>
+<li><strong>标准化</strong>将数据转换为均值为0、标准差为1的分布，它<strong>对离群点的鲁棒性要好得多</strong>。</li>
+</ul>
+<p>因此，在<strong>绝大多数机器学习场景中，特别是当数据分布未知或我们怀疑可能存在离群点时，标准化是更安全、更通用、更被推荐的选择。</strong> 在‘搜广推’的深度学习模型中，处理像‘商品价格’、‘用户年龄’、‘历史点击次数’这类稠密数值特征时，我们通常都会采用<strong>标准化</strong>，以保证模型训练的稳定性和鲁棒性。”</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>Author: </span><span class="post-copyright-info"><a href="https://qyp9909.github.io">Yuanpeng QU</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>Link: </span><span class="post-copyright-info"><a href="https://qyp9909.github.io/2025/08/12/ML_1/">https://qyp9909.github.io/2025/08/12/ML_1/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>Copyright Notice: </span><span class="post-copyright-info">All articles on this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless otherwise stated.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Study/">Study</a></div><div class="post-share"><div class="social-share" data-image="/images/cover/Rec_AD_Cover.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2025/08/12/DL_1/" title="深度学习小记"><img class="cover" src="/images/cover/Rec_AD_Cover.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">Previous</div><div class="info-item-2">深度学习小记</div></div><div class="info-2"><div class="info-item-1">深度学习小记Created by: Yuanpeng QUCreated time: 2025年8月12日 17:41 I. 神经网络的核心组件与训练技巧1. 归一化层：BN 与 LN 的原理、区别与应用场景 核心目的：解决“内部协变量偏移 (Internal Covariate Shift)”问题。即在训练中，由于前层网络参数不断变化，导致后层网络接收到的数据分布一直在变，拖慢收敛速度。归一化层通过将每层网络的输入强制拉回到一个稳定的分布（如均值为0，方差为1），从而加速训练。 Batch Normalization (BN) 原理：“纵向”或“按特征”归一化。它在一个批次（mini-batch）内，对每一个特征维度计算均值和方差，并进行归一化。 关键机制：引入了两个可学习的参数 γ (缩放) 和 β (平移)，让网络可以自主决定是否以及在多大程度上恢复原始的分布，以保证模型的表达能力。 训练 vs 推理：训练时使用当前批次的统计量，同时用滑动平均记录全局统计量；推理时则使用保存下来的全局统计量，以保证输出的确定性。 应用场景：在卷积神经网络 (CNN)...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>Related Articles</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/08/08/Rec_AD_Ranking/" title="搜广推笔记 排序"><img class="cover" src="/images/cover/Rec_AD_Cover.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-08-08</div><div class="info-item-2">搜广推笔记 排序</div></div><div class="info-2"><div class="info-item-1">搜广推[排序]Created by: Yuanpeng QUCreated time: 2025年8月9日 14:29 推荐系统排序模型知识体系总结（大纲）第一章：排序模型的基础 (Foundations of Ranking Models)在深入探讨各种复杂精妙的模型之前，我们必须先理解所有排序模型所立足的共同基础。这个基础包含两个层面：一是我们如何从业务逻辑上将“排序”这个抽象任务，转化为一个可以用数学模型解决的问题；二是在这个问题的解决方案中，那个最简单、最核心的基石模型——逻辑回归（LR）——是如何工作的。 1.1...</div></div></div></a><a class="pagination-related" href="/2025/08/06/Rec_AD_Recall/" title="搜广推笔记 召回"><img class="cover" src="/images/cover/Rec_AD_Cover.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-08-06</div><div class="info-item-2">搜广推笔记 召回</div></div><div class="info-2"><div class="info-item-1">搜广推[召回]Created by: Yuanpeng QUCreated time: 2025年8月5日 22:51 一、 推荐系统总体架构 (Overall Recommendation System Architecture)1. 级联漏斗范式 (Cascading Funnel Paradigm) 现代大规模推荐系统的核心架构，普遍遵循一种级联漏斗范式 (Cascading Funnel Paradigm)。这个范式的诞生，是为了解决一个根本性的矛盾：一方面，我们的候选物品库是海量的（百万、千万甚至上亿级别）；另一方面，用户的屏幕空间是有限的，且要求响应速度极快（毫秒级）。 因此，我们不可能对所有物品都用最复杂的模型进行最精确的计算。漏斗范式通过设置多个层层递进的过滤环节，实现了从海量到少量，从粗糙到精准的逐级筛选，在计算效率和推荐效果之间取得了极致的平衡。 这个漏斗通常包含以下四个核心层级： 1. 召回层 (Recall...</div></div></div></a><a class="pagination-related" href="/2025/08/11/Rec_AD_Metrics/" title="搜广推笔记 指标"><img class="cover" src="/images/cover/Rec_AD_Cover.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-08-11</div><div class="info-item-2">搜广推笔记 指标</div></div><div class="info-2"><div class="info-item-1">搜广推[指标]Created by: Yuanpeng QUCreated time: 2025年8月11日 16:14 一、...</div></div></div></a><a class="pagination-related" href="/2025/08/10/Rec_AD_MTL/" title="搜广推笔记 多目标排序"><img class="cover" src="/images/cover/Rec_AD_Cover.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-08-10</div><div class="info-item-2">搜广推笔记 多目标排序</div></div><div class="info-2"><div class="info-item-1">搜广推[多目标排序]Created by: Yuanpeng QUCreated time: 2025年8月10日 21:12 第一部分：多目标学习的核心挑战与基础1. 动机：为何需要多目标学习？现代工业级推荐系统（如电商、短视频）的目标是综合性的，不能只关注单一指标 。例如，一个短视频推荐系统不仅要优化点击率，可能还要同时提升用户的点赞、关注、转发、评论率以及观看时长 。 如果为每个任务单独建模和优化，或者用一个简单的模型直接预测所有任务，就会遇到**“跷跷板效应” (Seesaw Phenomenon)** 。  定义：指的是当模型在优化一个目标时，会导致另一个或多个其他目标的性能下降的现象 。 举例： 任务跷跷板 (Task Seesaw)：一个模型如果过度优化点击率（CTR），可能会倾向于推荐标题党或封面吸引人的内容，但这部分内容的用户实际满意度（如观看时长、点赞率）可能很低，从而损害了长期用户体验 。 领域跷跷板 (Domain...</div></div></div></a><a class="pagination-related" href="/2025/08/12/DL_1/" title="深度学习小记"><img class="cover" src="/images/cover/Rec_AD_Cover.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-08-12</div><div class="info-item-2">深度学习小记</div></div><div class="info-2"><div class="info-item-1">深度学习小记Created by: Yuanpeng QUCreated time: 2025年8月12日 17:41 I. 神经网络的核心组件与训练技巧1. 归一化层：BN 与 LN 的原理、区别与应用场景 核心目的：解决“内部协变量偏移 (Internal Covariate Shift)”问题。即在训练中，由于前层网络参数不断变化，导致后层网络接收到的数据分布一直在变，拖慢收敛速度。归一化层通过将每层网络的输入强制拉回到一个稳定的分布（如均值为0，方差为1），从而加速训练。 Batch Normalization (BN) 原理：“纵向”或“按特征”归一化。它在一个批次（mini-batch）内，对每一个特征维度计算均值和方差，并进行归一化。 关键机制：引入了两个可学习的参数 γ (缩放) 和 β (平移)，让网络可以自主决定是否以及在多大程度上恢复原始的分布，以保证模型的表达能力。 训练 vs 推理：训练时使用当前批次的统计量，同时用滑动平均记录全局统计量；推理时则使用保存下来的全局统计量，以保证输出的确定性。 应用场景：在卷积神经网络 (CNN)...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/LOGO.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Yuanpeng QU</div><div class="author-info-description">CS PhD, 3rd yr.</div><div class="site-data"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">15</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">4</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">5</div></a></div><a id="card-info-btn" href="https://qyp9909.github.io/homepage"><i class="fas fa-user-graduate"></i><span>Academic Homepage</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/qyp9909/qyp9909.github.io" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:qyp9909@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>Announcement</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Contents</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%B0%8F%E8%AE%B0"><span class="toc-number">1.</span> <span class="toc-text">机器学习小记</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%EF%BC%9A%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6-Core-Components-of-Neural-Networks"><span class="toc-number">2.</span> <span class="toc-text">第一部分：神经网络的核心组件 (Core Components of Neural Networks)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%EF%BC%9A%E4%BB%8E%E7%BB%8F%E5%85%B8%E5%88%B0%E7%8E%B0%E4%BB%A3"><span class="toc-number">2.1.</span> <span class="toc-text">1.1 激活函数：从经典到现代</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E6%9D%83%E9%87%8D%E5%88%9D%E5%A7%8B%E5%8C%96%EF%BC%9A%E8%AE%A9%E8%AE%AD%E7%BB%83%E7%A8%B3%E5%AE%9A%E8%B5%B7%E6%AD%A5"><span class="toc-number">2.2.</span> <span class="toc-text">1.2 权重初始化：让训练稳定起步</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%EF%BC%9A%E6%A8%A1%E5%9E%8B%E7%9A%84%E2%80%9C%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E2%80%9D%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0-The-Model%E2%80%99s-%E2%80%9CNavigation-System%E2%80%9D-Loss-Functions"><span class="toc-number">3.</span> <span class="toc-text">第二部分：模型的“导航系统”：损失函数 (The Model’s “Navigation System”: Loss Functions)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E5%88%86%E7%B1%BB%E9%97%AE%E9%A2%98%E7%9A%84%E5%9F%BA%E7%9F%B3%EF%BC%9A%E4%BA%A4%E5%8F%89%E7%86%B5-Cross-Entropy"><span class="toc-number">3.1.</span> <span class="toc-text">2.1 分类问题的基石：交叉熵 (Cross-Entropy)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E5%9B%9E%E5%BD%92%E9%97%AE%E9%A2%98%E7%9A%84%E9%80%89%E6%8B%A9%EF%BC%9AMSE-MAE-%E4%B8%8E-Huber-Loss"><span class="toc-number">3.2.</span> <span class="toc-text">2.2 回归问题的选择：MSE, MAE 与 Huber Loss</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E8%A7%A3%E5%86%B3%E7%89%B9%E5%AE%9A%E9%9A%BE%E9%A2%98%E7%9A%84%E8%BF%9B%E9%98%B6%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0"><span class="toc-number">3.3.</span> <span class="toc-text">2.3 解决特定难题的进阶损失函数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%EF%BC%9A%E7%90%86%E8%AE%BA%E6%B7%B1%E5%BA%A6%EF%BC%9A%E7%BB%9F%E8%AE%A1%E4%B8%8E%E4%BC%98%E5%8C%96%E5%8E%9F%E7%90%86-Theoretical-Depth-Statistical-Optimization-Principles"><span class="toc-number">4.</span> <span class="toc-text">第三部分：理论深度：统计与优化原理 (Theoretical Depth: Statistical &amp; Optimization Principles)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E5%8F%82%E6%95%B0%E4%BC%B0%E8%AE%A1%E7%9A%84%E4%B8%A4%E7%A7%8D%E8%A7%86%E8%A7%92%EF%BC%9A%E6%9C%80%E5%A4%A7%E4%BC%BC%E7%84%B6-MLE-%E4%B8%8E%E6%9C%80%E5%A4%A7%E5%90%8E%E9%AA%8C-MAP"><span class="toc-number">4.1.</span> <span class="toc-text">3.1 参数估计的两种视角：最大似然(MLE)与最大后验(MAP)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E2%80%9C%E5%88%86%E5%B8%83%E2%80%9D%E7%9A%84%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E8%A7%A3%E8%AF%BB"><span class="toc-number">4.2.</span> <span class="toc-text">3.2 “分布”的核心概念解读</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E4%BC%98%E5%8C%96%E7%9A%84%E2%80%9C%E5%9C%B0%E5%BD%A2%E2%80%9D%EF%BC%9A%E5%87%B8%E5%87%BD%E6%95%B0%E4%B8%8E%E9%9D%9E%E5%87%B8%E5%87%BD%E6%95%B0"><span class="toc-number">4.3.</span> <span class="toc-text">3.3 优化的“地形”：凸函数与非凸函数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%EF%BC%9A%E7%BB%8F%E5%85%B8%E6%A8%A1%E5%9E%8B%E5%AF%B9%E6%AF%94%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%A2%84%E5%A4%84%E7%90%86-Classic-Model-Comparison-Data-Preprocessing"><span class="toc-number">5.</span> <span class="toc-text">第四部分：经典模型对比与数据预处理 (Classic Model Comparison &amp; Data Preprocessing)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E4%B8%A4%E5%A4%A7%E7%BA%BF%E6%80%A7%E5%88%86%E7%B1%BB%E5%99%A8%EF%BC%9ASVM-vs-%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92-LR"><span class="toc-number">5.1.</span> <span class="toc-text">4.1 两大线性分类器：SVM vs. 逻辑回归(LR)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E7%89%B9%E5%BE%81%E7%BC%A9%E6%94%BE%EF%BC%9A%E5%BD%92%E4%B8%80%E5%8C%96-Normalization-vs-%E6%A0%87%E5%87%86%E5%8C%96-Standardization"><span class="toc-number">5.2.</span> <span class="toc-text">4.2 特征缩放：归一化(Normalization) vs. 标准化(Standardization)</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Posts</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/08/12/ML_1/" title="机器学习小记"><img src="/images/cover/Rec_AD_Cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="机器学习小记"/></a><div class="content"><a class="title" href="/2025/08/12/ML_1/" title="机器学习小记">机器学习小记</a><time datetime="2025-08-12T09:00:00.000Z" title="Created 2025-08-12 18:00:00">2025-08-12</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/08/12/DL_1/" title="深度学习小记"><img src="/images/cover/Rec_AD_Cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="深度学习小记"/></a><div class="content"><a class="title" href="/2025/08/12/DL_1/" title="深度学习小记">深度学习小记</a><time datetime="2025-08-12T03:00:00.000Z" title="Created 2025-08-12 12:00:00">2025-08-12</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/08/11/Rec_AD_Metrics/" title="搜广推笔记 指标"><img src="/images/cover/Rec_AD_Cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="搜广推笔记 指标"/></a><div class="content"><a class="title" href="/2025/08/11/Rec_AD_Metrics/" title="搜广推笔记 指标">搜广推笔记 指标</a><time datetime="2025-08-11T06:00:00.000Z" title="Created 2025-08-11 15:00:00">2025-08-11</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/08/10/Rec_AD_MTL/" title="搜广推笔记 多目标排序"><img src="/images/cover/Rec_AD_Cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="搜广推笔记 多目标排序"/></a><div class="content"><a class="title" href="/2025/08/10/Rec_AD_MTL/" title="搜广推笔记 多目标排序">搜广推笔记 多目标排序</a><time datetime="2025-08-10T09:00:00.000Z" title="Created 2025-08-10 18:00:00">2025-08-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/08/08/Rec_AD_Ranking/" title="搜广推笔记 排序"><img src="/images/cover/Rec_AD_Cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="搜广推笔记 排序"/></a><div class="content"><a class="title" href="/2025/08/08/Rec_AD_Ranking/" title="搜广推笔记 排序">搜广推笔记 排序</a><time datetime="2025-08-08T09:00:00.000Z" title="Created 2025-08-08 18:00:00">2025-08-08</time></div></div></div></div></div></div></main><footer id="footer" style="background: transparent;"><div id="footer-wrap"><div class="copyright">&copy;2021 - 2025 By Yuanpeng QU</div><div class="footer_custom_text">Welcome to Kyoku's <a href="https://qyp9909.github.io/">blog</a>! All right reserved.</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Reading Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Toggle Between Light and Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle Between Single-column and Double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="Settings"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back to Top"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="255,255,255" opacity="0.8" zIndex="-1" count="200" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
