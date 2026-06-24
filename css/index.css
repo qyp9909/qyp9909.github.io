@@ -222,7 +222,7 @@ template {
 .note:not(.no-icon)::before,
 .search-dialog hr:before {
   display: inline-block;
-  font-weight: 600;
+  font-weight: 900;
   font-family: 'Font Awesome 6 Free';
   text-rendering: auto;
   -webkit-font-smoothing: antialiased;
@@ -4123,6 +4123,7 @@ figure.highlight pre .javascript .function {
 .container h4,
 .container h5,
 .container h6 {
+  position: relative;
   -webkit-transition: all 0.2s ease-out;
   -moz-transition: all 0.2s ease-out;
   -o-transition: all 0.2s ease-out;
