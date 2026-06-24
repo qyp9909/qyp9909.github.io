@@ -43,8 +43,8 @@
 
 /*blog字体 -------------------------------------------------------------------- */
 @font-face{
-  font-family:'blogFont' ;  /* 字体名自定义即可 */
-  src:url('/fonts/circle400w.ttf'); /* 字体文件路径 */
+  font-family:'blogFont' ;
+  src:url('/fonts/circle400w.ttf');
   font-display : swap;
 }
 
@@ -60,43 +60,46 @@ code {
   font-family: Consolas, monospace;
 }
 
+/* 顶部 Pace.js 进度条：白色 5px + 头部蓝色发光 ------------------------------ */
+@keyframes pace-spinner {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.pace .pace-progress {
+  background: #ffffff !important;
+  height: 5px !important;
+}
+
+.pace .pace-progress-inner {
+  box-shadow: 0 0 10px #1E92FB, 0 0 5px #ffffff;
+}
+
+.pace .pace-activity {
+  display: block !important;
+  position: fixed !important;
+  z-index: 2000 !important;
+  top: 15px !important;
+  right: 15px !important;
+  width: 14px !important;
+  height: 14px !important;
+  border: 2px solid transparent !important;
+  border-top-color: #ffffff !important;
+  border-left-color: #ffffff !important;
+  border-radius: 50% !important;
+  animation: pace-spinner 0.4s linear infinite !important;
+}
+
 /* 设置滚动条整体样式 */
 ::-webkit-scrollbar {
-  width: 12px; /* 设置滚动条的宽度 */
+  width: 12px;
 }
 ::-webkit-scrollbar-thumb {
-  border-radius: 6px; /* 圆角 */
+  border-radius: 6px;
 }
 
-/*模糊变清晰效果 -------------------------------------------------------------------- */
 
-/*10s为加载动画的时间，1为加载动画的次数，ease-in-out为动画效果*/
-#page-header,
-#web_bg {
-    -webkit-animation: imgblur 1.2s 1 ease-in-out;
-    animation: imgblur 1.2s 1 ease-in-out;
-}
-@keyframes imgblur {
-  0% {
-    filter: blur(5px);
-  }
-  100% {
-    filter: blur(0px);
-  }
-}
-/*适配使用-webkit内核的浏览器 */
-@-webkit-keyframes imgblur {
-  0% {
-    -webkit-filter: blur(5px);
-  }
-  100% {
-    -webkit-filter: blur(0px);
-  }
-}
-
-/* 整个blog图片一致-------------------------------------------------------------------- */
-
-/* 页脚透明 footer_bg: false为前提*/
+/* 页脚透明 footer_bg: false为前提 */
 #footer {
   background: transparent!important;
 }
@@ -104,11 +107,11 @@ code {
 #page-header{
   background: transparent!important;
 }
-/*top-img黑色透明玻璃效果移除，不建议加，除非你执着于完全一图流或者背景图对比色明显 */
+/* top-img黑色透明玻璃效果移除 */
 #page-header.post-bg:before {
   background-color: transparent!important;
 }
-/*夜间模式伪类遮罩层透明*/
+/* 夜间模式伪类遮罩层透明 */
 [data-theme="dark"]
   #footer::before{
       background: transparent!important;
@@ -118,40 +121,175 @@ code {
     background: transparent!important;
     }
 
-/* 卡片透明度-------------------------------------------------------------------- */
-
-/*侧边卡片的透明度 */
-:root {
-    --card-bg: rgba(255, 255, 255, .9);
+/* html 用 0.jpg 兜底，视频未加载前无闪烁 */
+html {
+  background: url('/img/0.jpg') center / cover no-repeat fixed;
 }
 
-[data-theme='dark'] {
-  --card-bg: rgba(18, 18, 18, 0.9);  /* 暗色模式卡片背景 */
-}
-:root {
-    --light_bg_color: rgba(255, 255, 255, 0.9);
-    --dark_bg_color: rgba(18, 18, 18, 0.9);
-    --light_page_color: rgba(255, 255, 255, 0.9);
-    --dark_page_color: rgba(18, 18, 18, 0.9);
+/* body 透明让视频透出 */
+body {
+  background: transparent !important;
 }
 
-
-/* 修改顶部进度条的颜色和宽度-------------------------------------------------------------------- */
-    /* .pace .pace-progress {
-        background: #ffffff; 
-        height: 3px;
-    }
-    .pace .pace-progress-inner {
-         box-shadow: 0 0 10px #1E92FB, 0 0 5px     #ffffff; 
-    }*/
-    .pace .pace-activity {
-        border-top-color: #ffffff;    
-        border-left-color: #ffffff;    
-    } 
-
-    .pace .pace-progress {
-        background: #ffffff !important; /* 蓝色进度条 */
-        height: 5px !important;         /* 改成你想要的宽度 */
+/* 隐藏 Butterfly 默认背景 div（改用视频背景） */
+#web_bg {
+  display: none !important;
 }
 
+/* 背景视频模糊加载动画 -------------------------------------------------------- */
+@keyframes imgblur {
+  from {
+    filter: blur(16px);
+    transform: scale(1.04);
+  }
+  to {
+    filter: blur(0);
+    transform: scale(1);
+  }
+}
+
+#bg-video {
+  animation: imgblur 1.8s ease-out;
+}
+
+/* 毛玻璃卡片效果（仅亮色模式） ----------------------------------------------- */
+html:not([data-theme="dark"]) {
+  --card-bg: rgba(255, 255, 255, 0.62);
+  --card-box-shadow: 0 4px 24px rgba(31, 38, 135, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.32);
+  --card-hover-box-shadow: 0 8px 32px rgba(31, 38, 135, 0.18), 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
+html:not([data-theme="dark"]) .layout > div:first-child:not(.nc),
+html:not([data-theme="dark"]) .card-widget,
+html:not([data-theme="dark"]) #recent-posts .recent-post-item {
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+}
+
+/* 文章页：全屏毛玻璃背景 + 浮动内容框 --------------------------------------- */
+
+/* 亮色模式：毛玻璃遮罩（夹在背景图和内容之间） */
+html:not([data-theme="dark"]) #body-wrap.post::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  backdrop-filter: blur(22px) brightness(0.88);
+  -webkit-backdrop-filter: blur(22px) brightness(0.88);
+  background: rgba(210, 225, 245, 0.18);
+  pointer-events: none;
+}
+
+/* 亮色模式：主内容卡片纯白浮动 */
+html:not([data-theme="dark"]) #body-wrap.post .layout > div:first-child:not(.nc) {
+  background: rgba(255, 255, 255, 0.97) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* 亮色模式：侧边栏卡片接近纯白浮动 */
+html:not([data-theme="dark"]) #body-wrap.post .card-widget {
+  background: rgba(255, 255, 255, 0.93) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.14), 0 1px 4px rgba(0, 0, 0, 0.07) !important;
+}
+
+/* 暗色模式：毛玻璃遮罩改为深色调 */
+[data-theme="dark"] #body-wrap.post::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  backdrop-filter: blur(22px) brightness(0.65);
+  -webkit-backdrop-filter: blur(22px) brightness(0.65);
+  background: rgba(10, 20, 45, 0.35);
+  pointer-events: none;
+}
+
+/* 暗色模式：卡片去掉毛玻璃，保持 Butterfly 默认深色背景 + 浮动阴影 */
+[data-theme="dark"] #body-wrap.post .layout > div:first-child:not(.nc) {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="dark"] #body-wrap.post .card-widget {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.45), 0 1px 4px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* 首次访问加载遮罩 =========================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
+
+#wls-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  overflow: hidden;
+  background: #ffffff;
+  transition: opacity 1.4s ease-out;
+  will-change: opacity;
+}
+
+#wls-overlay.wls-unlock {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#wls-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 0%;
+  background: #27679D;
+  transition: width 0.22s ease-out;
+}
+
+#wls-counter {
+  position: absolute;
+  bottom: 48px;
+  left: 64px;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  color: #ffffff;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+}
+
+#wls-pct {
+  font-size: 14rem;
+  letter-spacing: -2px;
+}
+
+#wls-unit {
+  font-size: 8rem;
+  padding-bottom: 1.2rem;
+  opacity: 0.8;
+}
+
+/* 放大进入动画幅度 ----------------------------------------------------------- */
+@keyframes header-effect {
+  0%   { transform: translateY(-100px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes bottom-top {
+  0%   { transform: translateY(100px); }
+  100% { transform: translateY(0); }
+}
+
+#page-header:not(.full_page),
+#nav.show {
+  animation: header-effect 0.85s cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+#content-inner,
+#footer {
+  animation: bottom-top 0.85s cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
 
