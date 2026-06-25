@@ -52,6 +52,43 @@ h1#site-title {
   font-family: 'blogFont', sans-serif;
 }
 
+#site-title-btn {
+  cursor: pointer;
+}
+
+/* 首页标题点击全屏切换 */
+#page-header.full_page.header-expanded {
+  height: 100vh !important;
+}
+
+/* 导航栏透明度覆盖 */
+html:not([data-theme="dark"]) #page-header.not-top-img #nav,
+html:not([data-theme="dark"]) #page-header.nav-fixed #nav {
+  background: rgba(255, 255, 255, var(--nav-glass-opacity, 0.7)) !important;
+}
+[data-theme="dark"] #page-header.nav-fixed > #nav,
+[data-theme="dark"] #page-header.not-top-img > #nav {
+  background: rgba(18, 18, 18, var(--nav-glass-opacity, 0.7)) !important;
+}
+
+/* 侧边栏 Tags 文字加深 + hover 橙色高亮 */
+html:not([data-theme="dark"]) .card-tags a {
+  color: #27679D !important;
+}
+#aside-content .card-tags .card-tag-cloud a:hover {
+  color: #E77218 !important;
+}
+
+/* 翻页按钮数字/箭头加深 + hover 白色文字 */
+html:not([data-theme="dark"]) #pagination .page-number:not(.current),
+html:not([data-theme="dark"]) #pagination .extend {
+  color: #27679D !important;
+}
+html:not([data-theme="dark"]) #pagination .page-number:not(.current):hover,
+html:not([data-theme="dark"]) #pagination .extend:hover {
+  color: #ffffff !important;
+}
+
 body {
   font-family: 'blogFont', sans-serif;
 }
@@ -126,6 +163,27 @@ html {
   background: url('/img/0.jpg') center / cover no-repeat fixed;
 }
 
+/* 手机端：隐藏视频，改用纯色背景；进度条字号缩小 50% */
+@media (max-width: 768px) {
+  html {
+    background: #27679D !important;
+  }
+  #bg-video {
+    display: none !important;
+  }
+  #wls-pct {
+    font-size: 7rem !important;
+  }
+  #wls-unit {
+    font-size: 4rem !important;
+    padding-bottom: 0.6rem !important;
+  }
+  #wls-counter {
+    bottom: 32px;
+    left: 32px;
+  }
+}
+
 /* body 透明让视频透出 */
 body {
   background: transparent !important;
@@ -148,13 +206,33 @@ body {
   }
 }
 
+@keyframes imgblur-dark {
+  from {
+    filter: blur(16px) brightness(0.45);
+    transform: scale(1.04);
+  }
+  to {
+    filter: blur(0) brightness(0.45);
+    transform: scale(1);
+  }
+}
+
 #bg-video {
-  animation: imgblur 1.8s ease-out;
+  animation-name: imgblur;
+  animation-duration: var(--bg-blur-duration, 1.8s);
+  animation-timing-function: ease-out;
+  object-position: center 30%;
+}
+
+/* 暗色模式：仅在非文章页降低视频亮度，文章页由 ::before 遮罩处理 */
+html[data-theme="dark"]:not(:has(#body-wrap.post)) #bg-video {
+  filter: brightness(0.45);
+  animation-name: imgblur-dark;
 }
 
 /* 毛玻璃卡片效果（仅亮色模式） ----------------------------------------------- */
 html:not([data-theme="dark"]) {
-  --card-bg: rgba(255, 255, 255, 0.62);
+  --card-bg: rgba(255, 255, 255, var(--card-glass-opacity, 0.62));
   --card-box-shadow: 0 4px 24px rgba(31, 38, 135, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.32);
   --card-hover-box-shadow: 0 8px 32px rgba(31, 38, 135, 0.18), 0 0 0 1px rgba(255, 255, 255, 0.5);
 }
