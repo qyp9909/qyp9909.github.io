@@ -166,7 +166,7 @@ html {
 /* 手机端：隐藏视频，改用纯色背景；进度条字号缩小 50% */
 @media (max-width: 768px) {
   html {
-    background: #27679D !important;
+    background: url('/img/4.jpg') center / cover no-repeat fixed !important;
   }
   #bg-video {
     display: none !important;
@@ -348,6 +348,45 @@ html:not([data-theme="dark"]) #body-wrap.post .card-widget {
   font-size: 8rem;
   padding-bottom: 1.2rem;
   opacity: 0.8;
+}
+
+@keyframes wls-btn-appear {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+#wls-slow-btn {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  padding: 1rem 2.2rem;
+  font-size: 1.2rem;
+  font-family: 'blogFont', sans-serif;
+  font-weight: 700;
+  color: #ffffff;
+  background: #27679D;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(39, 103, 157, 0.45);
+  white-space: nowrap;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+  animation: wls-btn-appear 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+#wls-slow-btn:hover {
+  background: #E77218;
+  box-shadow: 0 6px 28px rgba(231, 114, 24, 0.5);
+}
+
+@media (max-width: 768px) {
+  #wls-slow-btn {
+    font-size: 1rem;
+    padding: 0.8rem 1.6rem;
+  }
 }
 
 /* 放大进入动画幅度 ----------------------------------------------------------- */

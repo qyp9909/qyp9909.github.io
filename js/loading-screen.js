@@ -2,16 +2,17 @@
   var overlay = document.getElementById('wls-overlay');
   if (!overlay) return;
 
-  var fill  = document.getElementById('wls-fill');
-  var pctEl = document.getElementById('wls-pct');
-  var progress = 0;
-  var finished = false;
+  var fill    = document.getElementById('wls-fill');
+  var pctEl   = document.getElementById('wls-pct');
+  var slowBtn = document.getElementById('wls-slow-btn');
+  var progress  = 0;
+  var finished  = false;
   var startTime = Date.now();
   var MIN_DURATION = 2000;
 
   function setProgress(v) {
     v = Math.min(100, Math.max(0, Math.round(v)));
-    if (fill) fill.style.width = v + '%';
+    if (fill)  fill.style.width = v + '%';
     if (pctEl) pctEl.textContent = v;
   }
 
@@ -25,6 +26,7 @@
   function doFinish() {
     finished = true;
     clearInterval(simTimer);
+    if (slowBtn) slowBtn.style.display = 'none';
     function rush() {
       progress += 5;
       if (progress >= 100) {
@@ -40,7 +42,7 @@
 
   function finish() {
     if (finished) return;
-    var elapsed = Date.now() - startTime;
+    var elapsed   = Date.now() - startTime;
     var remaining = MIN_DURATION - elapsed;
     if (remaining > 0) {
       setTimeout(doFinish, remaining);
@@ -57,6 +59,17 @@
     }, { once: true });
   }
 
-  window.addEventListener('load', finish);
-  setTimeout(finish, 7000);
+  var slowTimer;
+
+  window.addEventListener('load', function () {
+    clearTimeout(slowTimer);
+    finish();
+  });
+
+  // 超过 10 秒仍未加载完，显示催促按钮
+  slowTimer = setTimeout(function () {
+    if (finished || !slowBtn) return;
+    slowBtn.style.display = 'block';
+    slowBtn.addEventListener('click', finish, { once: true });
+  }, 10000);
 })();
