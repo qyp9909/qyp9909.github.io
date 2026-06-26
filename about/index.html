@@ -7,7 +7,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://qyp9909.github.io/img/LOGO.png">
 <meta property="article:published_time" content="2021-10-09T15:58:25.000Z">
-<meta property="article:modified_time" content="2026-06-25T05:46:21.381Z">
+<meta property="article:modified_time" content="2026-06-26T13:42:06.404Z">
 <meta property="article:author" content="Yuanpeng QU">
 <meta property="article:tag" content="CS, PhD, Machine Learning, Recommender Systems, Deep Learning, Research">
 <meta name="twitter:card" content="summary">
@@ -170,6 +170,63 @@ btf.addGlobalFn('pjaxSend', () => {
 #article-container h6 {
   padding-left: 0 !important;
 }
+
+/* 3D keyboard section */
+#kb-wrap {
+  position: relative;
+  width: 100%;
+  height: 460px;
+  border-radius: 16px;
+  overflow: hidden;
+  margin: 0 0 32px;
+}
+#kb-canvas {
+  display: block;
+  cursor: crosshair;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+#kb-info {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: rgba(10, 10, 20, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  opacity: 0;
+  max-width: 220px;
+}
+#kb-info-name {
+  font-size: 1.05em;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin-bottom: 4px;
+}
+#kb-info-desc {
+  font-size: 0.78em;
+  opacity: 0.72;
+  line-height: 1.4;
+}
+#kb-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.9em;
+  letter-spacing: 0.08em;
+}
+@media (max-width: 768px) {
+  #kb-wrap { height: 300px; }
+}
 </style>
 <div style="text-align:center; margin: 20px 0 32px;">
   <div style="width:110px; height:110px; border-radius:50%; background-image:url('/img/LOGO.png'); background-size:cover; background-position:center; margin:0 auto;"></div>
@@ -187,6 +244,219 @@ btf.addGlobalFn('pjaxSend', () => {
 <li>🎓 <strong>Google Scholar</strong>：<a target="_blank" rel="noopener" href="https://scholar.google.com/citations?user=8Ruz17UAAAAJ">scholar.google.com</a></li>
 <li>💼 <strong>LinkedIn</strong>：<a target="_blank" rel="noopener" href="https://linkedin.com/in/qyp9909">linkedin.com/in/qyp9909</a></li>
 </ul>
+<h2 id="技术栈">技术栈</h2>
+<div id="kb-wrap">
+  <canvas id="kb-canvas"></canvas>
+  <div id="kb-info">
+    <div id="kb-info-name"></div>
+    <div id="kb-info-desc"></div>
+  </div>
+  <div id="kb-loading">Loading 3D scene…</div>
+</div>
+<script type="module">
+(async () => {
+  const wrap   = document.getElementById('kb-wrap');
+  const canvas = document.getElementById('kb-canvas');
+  const loadEl = document.getElementById('kb-loading');
+  const infoEl = document.getElementById('kb-info');
+  const sleep  = ms => new Promise(r => setTimeout(r, ms));
+
+  function showErr(msg) {
+    if (loadEl) { loadEl.textContent = msg; loadEl.style.color = 'rgba(255,100,100,0.6)'; }
+  }
+
+  // Load runtime + GSAP in parallel
+  let Application, gsap;
+  try {
+    const [sm, gm] = await Promise.all([
+      import('https://unpkg.com/@splinetool/runtime@1.9.3/build/runtime.js'),
+      import('https://esm.sh/gsap@3.12.5')
+    ]);
+    Application = sm.Application;
+    gsap = gm.gsap;
+  } catch (e) { showErr('依赖加载失败，请刷新重试'); return; }
+
+  const app = new Application(canvas);
+  try {
+    await app.load('/assets/skills-keyboard.spline');
+  } catch (e) { showErr('3D 场景加载失败'); return; }
+
+  // Make 3D scene background transparent so blog background shows through
+  try {
+    if (app._scene) app._scene.background = null;
+    if (app._renderer) app._renderer.setClearColor(0x000000, 0);
+  } catch (_) {}
+
+  // Let Spline render at its native window dimensions, then CSS-transform the
+  // canvas into the container. getBoundingClientRect() accounts for the transform,
+  // so Spline's internal mouse-to-3D raycasting stays correct automatically.
+  function syncRenderer() {
+    const cw = wrap.clientWidth,  ch = wrap.clientHeight;
+    const ww = window.innerWidth, wh = window.innerHeight;
+    if (!cw || !ch || !ww || !wh) return;
+    const scale = ch / wh;
+    const tx    = Math.round((cw - ww * scale) / 2);
+    canvas.style.width           = ww + 'px';
+    canvas.style.height          = wh + 'px';
+    canvas.style.transform       = 'translate(' + tx + 'px, 0px) scale(' + scale + ')';
+    canvas.style.transformOrigin = 'top left';
+  }
+  syncRenderer();
+  window.addEventListener('resize', syncRenderer, { passive: true });
+  // ────────────────────────────────────────────────────────────────────────────
+
+  if (loadEl) loadEl.style.display = 'none';
+
+  // ── AUDIO (Web Audio API, same logic as original useSounds hook) ─────────
+  let audioCtx = null, pressBuffer = null, releaseBuffer = null;
+  (async () => {
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      audioCtx = new Ctx();
+      const [pb, rb] = await Promise.all([
+        fetch('/assets/keycap-sounds/press.mp3').then(r => r.arrayBuffer()).then(b => audioCtx.decodeAudioData(b)),
+        fetch('/assets/keycap-sounds/release.mp3').then(r => r.arrayBuffer()).then(b => audioCtx.decodeAudioData(b))
+      ]);
+      pressBuffer = pb;
+      releaseBuffer = rb;
+    } catch (_) {}
+  })();
+
+  function playBuffer(buffer) {
+    try {
+      if (!audioCtx || !buffer) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const src  = audioCtx.createBufferSource();
+      const gain = audioCtx.createGain();
+      src.buffer = buffer;
+      src.detune.value = (Math.random() * 200) - 100; // slight pitch variation
+      gain.gain.value = 0.4;
+      src.connect(gain);
+      gain.connect(audioCtx.destination);
+      src.start(0);
+    } catch (_) {}
+  }
+  // ────────────────────────────────────────────────────────────────────────────
+
+  // ── KEYBOARD SETUP ──────────────────────────────────────────────────────────
+  const kbd = app.findObjectByName('keyboard');
+  const isMobile = window.innerWidth < 768;
+  const scaleOffset = Math.min(Math.max(window.innerWidth / 1280, 0.5), 1.15);
+  const s = (isMobile ? 0.35 : 0.325) * scaleOffset;
+  let rotTween = null;
+
+  function startRotation() {
+    if (!kbd) return;
+    if (rotTween) rotTween.kill();
+    rotTween = gsap.to(kbd.rotation, {
+      y: kbd.rotation.y + Math.PI * 2,
+      duration: 14, repeat: -1, ease: 'none'
+    });
+  }
+
+  if (kbd) {
+    kbd.position.x = 0;
+    kbd.position.y = isMobile ? 0 : -40;
+    kbd.position.z = 0;
+    kbd.rotation.x = 0;
+    kbd.rotation.z = 0;
+    kbd.rotation.y = Math.PI / 12;
+
+    kbd.visible = false;
+    await sleep(300);
+    kbd.visible = true;
+
+    kbd.scale.x = kbd.scale.y = kbd.scale.z = 0.01;
+    gsap.to(kbd.scale, { x: s, y: s, z: s, duration: 1.5, ease: 'elastic.out(1, 0.6)', onComplete: startRotation });
+
+    await sleep(900);
+    const all = app.getAllObjects ? app.getAllObjects() : [];
+    const labelName = isMobile ? 'keycap-mobile' : 'keycap-desktop';
+    all.filter(o => o.name === labelName).forEach(async (kc, idx) => { await sleep(idx * 60); kc.visible = true; });
+    all.filter(o => o.name === 'keycap').forEach(async (kc, idx) => {
+      kc.visible = false;
+      await sleep(idx * 60);
+      kc.visible = true;
+      gsap.fromTo(kc.position, { y: 200 }, { y: 50, duration: 0.5, delay: 0.1, ease: 'bounce.out' });
+    });
+  }
+  // ────────────────────────────────────────────────────────────────────────────
+
+  // ── HOVER INTERACTIONS ───────────────────────────────────────────────────────
+  const SKILLS = {
+    js:        { label: 'JavaScript',  desc: "yeeting code into the DOM since '95, no cap! 💯🚀" },
+    ts:        { label: 'TypeScript',  desc: "JavaScript's overachieving cousin who's always flexing 💯🔒" },
+    html:      { label: 'HTML',        desc: "the internet's granddad, still bussin' fr fr! 💀🔥" },
+    css:       { label: 'CSS',         desc: "styling with the ultimate drip, no cap 💁‍♂️🔥" },
+    react:     { label: 'React',       desc: 'use using" using use = useUsing("use")' },
+    vue:       { label: 'Vue',         desc: "the chill pill for your frontend, it hits different! 🟢😌" },
+    nextjs:    { label: 'Next.js',     desc: "the drama queen of front-end frameworks, and we stan! 👑📜" },
+    tailwind:  { label: 'Tailwind',    desc: "utility classes hitting different fr fr 🌪️🔥" },
+    nodejs:    { label: 'Node.js',     desc: "JavaScript said 'sike, I'm backend now', deadass! 🔙🔚" },
+    express:   { label: 'Express',     desc: "middlewares go dummy hard, no cap! 🚂💨" },
+    postgres:  { label: 'PostgreSQL',  desc: "SQL but make it fashion, purr 💅🐘" },
+    mongodb:   { label: 'MongoDB',     desc: "flexin' with that NoSQL drip, respectfully! 💪🍃" },
+    git:       { label: 'Git',         desc: "the code's personal bodyguard, no cap! 🕵️‍♂️🔄" },
+    github:    { label: 'GitHub',      desc: "sliding into those pull requests, IYKYK! 🐙" },
+    prettier:  { label: 'Prettier',    desc: "making your code not a whole mess, thank u next 🧹✨" },
+    npm:       { label: 'npm',         desc: "package manager said 'I gotchu fam', period! 📦💯" },
+    firebase:  { label: 'Firebase',    desc: "your app's ultimate wingman, watch out for vendor lock-in vibes! 🔥👌" },
+    wordpress: { label: 'WordPress',   desc: "the grandpa of CMS, still rocking that cane 🧓👴" },
+    linux:     { label: 'Linux',       desc: "where 'chmod 777' is the ultimate flex 🔓🙌" },
+    docker:    { label: 'Docker',      desc: "The best containerization! 🐳🔥" },
+    nginx:     { label: 'Nginx',       desc: "reverse proxy go zoom zoom, sheesh! 🚗💨" },
+    aws:       { label: 'AWS',         desc: "always extra, making everything more complicated, period! 🌐👨‍💻" },
+    gcp:       { label: 'GCP',         desc: "cloud computing but make it Google vibes, living rent free! ☁️🔥" },
+    vim:       { label: 'Vim',         desc: "exit? In this economy? Ight, imma head out! 🚪🏃" },
+    vercel:    { label: 'Vercel',      desc: "The triangle company, helps you deploy and go touch grass! 🚀🌿" },
+  };
+
+  let prevName = null;
+  app.addEventListener('mouseHover', (e) => {
+    const name = e.target?.name;
+    const isBackground = !name || name === 'body' || name === 'platform' || name === 'keyboard';
+
+    if (isBackground) {
+      if (prevName) playBuffer(releaseBuffer);
+      prevName = null;
+      try { app.setVariable('heading', ''); app.setVariable('desc', ''); } catch (_) {}
+      if (infoEl) infoEl.style.opacity = '0';
+    } else if (name !== prevName) {
+      if (prevName) playBuffer(releaseBuffer);
+      playBuffer(pressBuffer);
+      prevName = name;
+      const skill = SKILLS[name];
+      const label = skill ? skill.label : name;
+      const desc  = skill ? skill.desc  : '';
+      try { app.setVariable('heading', label); app.setVariable('desc', desc); } catch (_) {}
+      if (infoEl) {
+        const nameEl = document.getElementById('kb-info-name');
+        const descEl = document.getElementById('kb-info-desc');
+        if (nameEl) nameEl.textContent = label;
+        if (descEl) descEl.textContent = desc;
+        infoEl.style.opacity = '1';
+      }
+    }
+  });
+  // ────────────────────────────────────────────────────────────────────────────
+
+  // ── DRAG TO ROTATE ───────────────────────────────────────────────────────────
+  let isDragging = false, lastX = 0;
+  canvas.addEventListener('mouseenter', () => { if (rotTween) rotTween.pause(); });
+  canvas.addEventListener('mouseleave', () => { if (!isDragging) startRotation(); });
+  canvas.addEventListener('mousedown',  (e) => { isDragging = true; lastX = e.clientX; canvas.style.cursor = 'grabbing'; });
+  document.addEventListener('mousemove', (e) => { if (!isDragging || !kbd) return; kbd.rotation.y += (e.clientX - lastX) * 0.007; lastX = e.clientX; });
+  document.addEventListener('mouseup',   () => { if (!isDragging) return; isDragging = false; canvas.style.cursor = 'grab'; });
+  canvas.addEventListener('touchstart', (e) => { isDragging = true; lastX = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener('touchmove', (e) => { if (!isDragging || !kbd) return; kbd.rotation.y += (e.touches[0].clientX - lastX) * 0.007; lastX = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend',  () => { isDragging = false; }, { passive: true });
+  canvas.style.cursor = 'grab';
+  // ────────────────────────────────────────────────────────────────────────────
+
+  document.addEventListener('visibilitychange', () => { document.hidden ? app.stop() : app.play(); });
+})();
+</script>
 <hr>
 <h2 id="博客功能更新日志">博客功能更新日志</h2>
 <div class="timeline blue"><div class="timeline-item headline">

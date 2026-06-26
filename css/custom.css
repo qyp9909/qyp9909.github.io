@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
+
 /* 本地托管 Font Awesome 6 Free，避免 CDN 加载失败导致图标显示异常 */
 @font-face {
   font-family: 'Font Awesome 6 Free';
@@ -300,8 +302,6 @@ html:not([data-theme="dark"]) #body-wrap.post .card-widget {
 }
 
 /* 首次访问加载遮罩 =========================================================== */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
-
 #wls-overlay {
   position: fixed;
   inset: 0;
